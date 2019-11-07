@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+	</head>
+	<body>
+		<h3>Public!</h3>
+		<button class='oauth'>Authenticate</button>
+		<script type="text/javascript">
+			// "use strict";
+			var popup;
+			$(document).ready(() => {
+				$('.oauth').click(() => {
+					var client_id = 'ea6gna29yeekmgxv3wezbvh9gdhkdf';
+					var url = `http://localhost:3000/authentication/#client_id=${client_id}`;
+					popup = window.open(url,'','width=600,height=800,left=50,top=50');
+
+					window.addEventListener('message', (event) => {
+						console.log(event);
+						alert('Success!');
+					});
+				});
+			});
+		</script>
+	</body>
+</html>
