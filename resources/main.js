@@ -275,6 +275,10 @@ window.addEventListener('message',(event) => {
 
 		return false;
 	}
+	if (localStorage.getItem('logged_in') == true) {
+		return false;
+	}
+	
 	var token = event.data.token;
 	popup.close();
 	Authorize('SETTOK',token);
@@ -288,7 +292,7 @@ function Authorize(status,token) {
 			var twitchapps = 'https://twitchapps.com/tokengen/';
 			var localhost = 'http://localhost:3000/authentication/';
 			var github = 'https://skwurw.github.io/authentication';
-			var redirect = (host=='skwurw.github.com'?github:(host=='localhost:3000'?localhost:twitchapps));
+			var redirect = (host=='skwurw.github.io'?github:(host=='localhost:3000'?localhost:twitchapps));
 			var url = `https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=${Authorize('CLIENTID')}&redirect_uri=${redirect}&scope=user_read`;
 			
 			popup = window.open(url,'','width=600,height=800,left=50,top=50');
