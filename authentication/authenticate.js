@@ -25,7 +25,6 @@ $(document).ready(() => {
 		} else if (token) {
 			//Post message to window with token
 			$('.token').html(`Access token: ${token}`);
-			$('.location').html(window.location.href);
 			var message = {
 				token:token
 			};
@@ -33,6 +32,5 @@ $(document).ready(() => {
 		}
 	} else {
 		$('body').html('Unauthorized');
-		$('body').append(`<div>${window.location.href}</div>`);
 	}
 });
