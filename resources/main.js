@@ -283,8 +283,12 @@ window.addEventListener('message',(event) => {
 function Authorize(status,token) {
 	switch (status) {
 		case 'GET':
-			// var redirect = 'https://twitchapps.com/tokengen/';
-			var redirect = 'http://localhost:3000/authentication/';
+			//For testing, different authentication routs
+			var host = window.location.host;
+			var twitchapps = 'https://twitchapps.com/tokengen/';
+			var localhost = 'http://localhost:3000/authentication/';
+			var github = 'https://skwurw.github.io/authentication';
+			var redirect = (host=='skwurw.github.com'?github:(host=='localhost:3000'?localhost:twitchapps));
 			var url = `https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=${Authorize('CLIENTID')}&redirect_uri=${redirect}&scope=user_read`;
 			
 			popup = window.open(url,'','width=600,height=800,left=50,top=50');
