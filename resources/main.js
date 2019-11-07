@@ -4,7 +4,6 @@ var imgRefresh = 30; // How often will preview images of stream try and update t
 var GetTime = function() {
 	return new Date().getTime()/1000;
 }
-
 var _blank = function() {}
 
 var template = $('[type="streamcard-template"]').html();
@@ -39,8 +38,9 @@ var Stream = function(data) {
 	
 	$('body').append(this.element);
 
-	//Update info about the constructor like uptime.
 }
+
+//Update info about the constructor like uptime.
 Stream.prototype.update = function(type,data) {
 	$('.refresh').html('Next refresh: '+(30-(Math.floor(performance.now()/1000)%imgRefresh)));
 	if (type == 'uptime') {
@@ -116,6 +116,7 @@ Stream.prototype.update = function(type,data) {
 Stream.prototype.updateNotifications = function(state) {
 
 }
+
 Stream.prototype.remove = function() {
 	var name = this.info.name;
 	$(this.element).remove();
@@ -201,7 +202,7 @@ function update(token,forced) {
 		storedStreams = (!storedStreams ? storedStreams : storedStreams.streams);
 		localStorage.setItem('last_updated',Math.floor((new Date().getTime())/1000));
 
-		var oauth_token = token || 'lvnl932opqkxvy8326gz82c4tbnahe';
+		var oauth_token = token;
 		var setStreams = function(d) {
 			checkStreams(d);
 
@@ -296,39 +297,6 @@ function Authorize(status,token) {
 			var url = `https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=${Authorize('CLIENTID')}&redirect_uri=${redirect}&scope=user_read`;
 			
 			popup = window.open(url,'','width=600,height=800,left=50,top=50');
-
-			// bootbox.prompt({
-			// 	size:'small',
-			// 	title:'Authenticate',
-			// 	message:'You are about to open a new tab to id.twitch.tv to authorize this app. Once you autherize you will then be re-directed to twitchapps.com/toknegen with a token highlighted red. Copy that and come back to paste it into the next prompt.<br><b>If you alrady have a valid token, then paste it into the prompt below.</b>',
-			// 	callback:(proceed) => {
-			// 		if (!proceed && proceed != null) {
-			// 			var win = window.open(url,'','width=600,height=800,left=50,top=50');
-			// 			bootbox.prompt({size:'small',title:'Authenticate',message:'Please input the oath token you got from twitchapps.com/tokengen/ in this prompt to continue.', callback:(d) => {Authorize('SETTOK',d)}});
-			// 		} else if (proceed != '' && proceed != null) {
-			// 			var settings = {
-			// 				type:'GET',
-			// 				url:'https://id.twitch.tv/oauth2/validate',
-			// 				headers:{
-			// 					'Authorization':`OAuth ${proceed}`,
-			// 				},
-			// 				success:(data) => {
-			// 					var valid = data.token;
-			// 					if (!valid) {
-			// 						Authorize('SETTOK',proceed);
-			// 					} else {
-			// 						Authorize('ERROR');
-			// 					}
-			// 				},
-			// 				error:() => {
-			// 					Authorize('ERROR');
-			// 				}
-			// 			}
-			// 			$.ajax(settings);
-			// 		}
-			// 	}
-			// });
-			
 			break;
 		case 'ERROR':
 			bootbox.alert({size:'small',title:'Error',message:'There was an error attemtping to authenticate.'});
@@ -419,9 +387,10 @@ function Authorize(status,token) {
 	}
 }
 
-Authorize('CHECK');
 
 $(document).ready(() => {
+	Authorize('CHECK'); // Check if a user has already connected.
+	
 	$('.login').click(() => {
 		var connected = $('.login').hasClass('connected');
 		
