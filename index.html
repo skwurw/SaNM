@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
 		<meta charset="UTF-8" />
+		<title>Stream and Notifications Manager</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="Description" content="A simple application to easily manage live stream notifications and following.">
 
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></link>
 		<link rel="stylesheet" type="text/css" href="resources/main.css">
@@ -10,7 +13,7 @@
 		<div class='refresh'></div>
 		<div class='login'>
 			<button class='login-button' title='Connect with twitch'>
-				<image class='login-button_image' src='https://i.imgur.com/WyKx5hL.png'></image>
+				<image class='login-button_image' alt='login_image' src='resources/connect.png'></image>
 			</button>
 			<div class='login-user-contents'>
 				test
@@ -18,7 +21,7 @@
 		</div>
 		<div class='streamCard' data-user="" type='streamcard-template' style="display:none;">
 			<div class='cardHead'>
-				<image class="cardHead-stream_preview" src=""/>
+				<image class="cardHead-stream_preview" src="" alt="stream_preview"/>
 				<div class='cardHead-overlay'>
 					<div class='cardHead-overlay_bottomEffect'></div>
 					<div class='cardHead-overlay_uptime' title='Started at'>
@@ -33,7 +36,7 @@
 				<div class='cardBody-top'>
 					<div class='cardBody-left'>
 						<div class='cardBody-left_logo'>
-							<image class='cardBody-left_logoImage' src=""/>
+							<image class='cardBody-left_logoImage' src="" alt="stream_logo"/>
 						</div>
 					</div>
 					<div class='cardBody-right'>
@@ -60,6 +63,9 @@
 		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.3.2/bootbox.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		
 		<script src="resources/main.js"></script>
+		<script src="resources/app.js"></script>
+		<script src="resources/Stream.js"></script>
 	</body>
 </html>
