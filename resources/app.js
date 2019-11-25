@@ -1,7 +1,7 @@
 "use strict";
 
 var App = function(version) {
-	this.version = '1.0.0';
+	this.version = '1.0.01';
 	this.askScopes = ['user_read'];
 
 	this._id = 'ea6gna29yeekmgxv3wezbvh9gdhkdf';

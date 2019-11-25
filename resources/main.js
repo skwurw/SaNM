@@ -150,7 +150,7 @@ function update(token,forced) {
 //Listener for messages from popup window when authenticating.
 var popup;
 window.addEventListener('message',(event) => {
-	if (!event.origon == window.location.origin) {
+	if (event.origin != window.location.origin) {
 		popup.close();
 		bootbox.alert('Message from popup proved to be insecure. Retry again.')
 
