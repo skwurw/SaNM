@@ -37,9 +37,6 @@ App.prototype.save = function() {
 App.prototype.load = function() {
 	if (localStorage._app) {
 		var appData = JSON.parse(localStorage._app);
-		// this.streams.updateRate = this.streams.updateRate;
-		// this.streams = (appData.streams?(!appData.streams.streams.length?this.streams:appData.streams):this.streams);
-		// this.streams._constructs = {};
 		this.streams = {
 			updateRate:this.streams.updateRate,
 			last_updated:(appData.streams.last_updated || this.streams.last_updated),
@@ -133,7 +130,6 @@ App.prototype.setToken = function(token) {
 			// If token is valid, then set info about it to the app.
 			this.token.key = token;
 			this.token.expire_time = (new Date().getTime())+(data.expires_in*1000);
-			// this.token.scopes = data.scopes;
 			// Set scopes as true keys in token object
 			for (index in data.scopes) {this.token.scopes[data.scopes[index]] = true;}
 			this.version_update = false;
@@ -167,8 +163,6 @@ App.prototype.login = function() {
 
 App.prototype.logout = function(reason) {
 	if (this.logged_in && this.token.key) {
-		// clearInterval(this.intervals.displayUpdate); // Clear the timer for checking stream updates.
-		// clearInterval(this.intervals.cardsUpdate);
 		for (var timer in this.intervals) {
 			clearInterval(this.intervals[timer]);
 			this.intervals[timer] = 0;
@@ -251,10 +245,7 @@ App.prototype.checkLogin = function(init) {
 		}
 
 		if (!this.intervals.displayUpdate) {clearInterval(this.intervals.displayUpdate);}
-		// this.intervals.displayUpdate = setInterval(update.bind(token),990);
 		this.intervals.displayUpdate = setInterval(this.updateStreams.bind(this),990);
-		// update(token,true);
-		// Do first update after updateFollowedInfo is done
 	}
 
 	return this;
@@ -268,8 +259,6 @@ App.prototype.updateStreams = function(forced) {
 	var request;
 
 	$('.refresh').html('Next refresh: '+Math.min(this.streams.updateRate,Math.max((this.streams.updateRate-timeDiff),0)));
-	// (this.streams.updateRate-(Math.floor(performance.now()/1000)%this.streams.updateRate))
-	// console.log(timeDiff,this.streams.updateRate,(timeDiff >= this.streams.updateRate));
 
 	// Check if user is logged in and has a token, aswell making sure we do a request after a certain amount of time
 	if (this.logged_in && this.token.key && (timeDiff >= this.streams.updateRate || forced)) {
@@ -319,8 +308,7 @@ App.prototype.updateStreams = function(forced) {
 		    		if (item) {
 			    		item.remove(_app);
 			    	}
-		    	}	
-	    		// bootbox.alert(`Streams removed: ${removed.length}<br><b>${removedStreamNames}</b>`);
+		    	}
 		    }
 		    if (_added.length) {
 		    	console.log('added!',_added);
@@ -328,7 +316,6 @@ App.prototype.updateStreams = function(forced) {
 		    		var lastIndex = (index+1)!=_added.length;
 		    		addedStreamNames += (!lastIndex&&_added.length!=1?'and ':'')+item.channel.display_name+(lastIndex&&_added.length!=1?', ':'');
 		    	}
-	    		// bootbox.alert(`Streams added: ${added.length}<br><b>${addedStreamNames}</b>`);
 		    }
 
 		    if ((_added.length || _removed.length)) {
@@ -462,9 +449,7 @@ App.prototype.updateFollowedInfo = function(forced) {
 						getInfo(offset+data.follows.length);
 					} else {
 						// If we don't need to do anymore request, then start the first update
-						// update(that.token.key,true);
 						that.updateStreams(true);
-						// that.loadingAnimation(false);
 					}
 				}).fail((err) => {that.error(err,that)});
 			}
@@ -472,7 +457,6 @@ App.prototype.updateFollowedInfo = function(forced) {
 			getInfo();
 		} else {
 			// If we can't request yet, then start first update
-			// update(this.token.key,true);
 			this.updateStreams(true);
 		}
 	}

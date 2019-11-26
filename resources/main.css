@@ -4,8 +4,6 @@ body {
 	font-size: 12px;
     --card-width: 350px;
     --card-height: 305px;
-    /*--card-width: 18.9%;*/
-    /*--card-height: 315px;*/
 	--card-radious: 5px;
     cursor: default;
     user-select: none;

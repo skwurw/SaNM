@@ -83,16 +83,13 @@ Stream.prototype.update = function(type,data,app) {
 		var lastUpdate = Number(previewEle.attr('lastUpdate'));
 		var perfTime = Math.floor(performance.now()/1000);
 		var docWidth = $(document).width();
-		// .189 is used because that is the percent for streamCard width
 		var imgWidth = 350;
 		var imgHeight = Math.floor(imgWidth*.5625);
 		var preview = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.info.name.toLowerCase()}-${imgWidth}x${imgHeight}.jpg?p=${perfTime}`;
-		// var preview = this.info.video.preview+'?p='+perfTime;
 		var logo = this.info.logo;
 
 		var streamLUD = Math.floor((new Date().getTime()-app.streams.last_updated)/1000);
 		//Update display to refresh image cache every so often.
-		// perfTime%app.streams.updateRate == 0
 		if (!lastUpdate || streamLUD>=100+app.streams.updateRate || streamLUD==0) {
 			var game = this.info.game;
 			var channel = this.info.name;
