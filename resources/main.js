@@ -1,5 +1,5 @@
 "use strict";
-var imgRefresh = 30; // How often will preview images of stream try and update to refresh cache of it.
+var imgRefresh = 40; // How often will preview images of stream try and update to refresh cache of it.
 //This also determines the refresh of data
 var app;
 var GetTime = function() {
@@ -11,8 +11,32 @@ var index = 1;
 var stream;
 var streams = {};
 var updateInterval;
-var displayUpdate;
 var changes = [];
+
+function dateDiff(start, end) {
+    var years = 0, months = 0, days = 0;
+    // Day diffence. Trick is to use setDate(0) to get the amount of days
+    // from the previous month if the end day less than the start day.
+    if (end.getDate() < start.getDate()) {
+        months = -1;
+        var datePtr = new Date(end);
+        datePtr.setDate(0);
+        days = end.getDate() + (datePtr.getDate() - start.getDate());
+    } else {
+        days = end.getDate() - start.getDate();
+    }
+
+    if (end.getMonth() < start.getMonth() ||
+       (end.getMonth() === start.getMonth() && end.getDate() < start.getDate())) {
+        years = -1;
+        months += end.getMonth() + (12 - start.getMonth());
+    } else {
+        months += end.getMonth() - start.getMonth();
+    }
+
+    years += end.getFullYear() - start.getFullYear();
+    return {years:years,months:months,weeks:Math.floor(days/7),days:days};
+}
 
 function checkStreams(data) {
 	//Compare to see if streams dropped.
@@ -40,7 +64,7 @@ function checkStreams(data) {
 			for (var index in removed) {
 				var name = removed[index].channel.display_name;
 				if (streams[name]) {
-					remStream.push(streams[name]);
+					remStream.push(streams[name].info);
 					streams[name].remove();
 				}
 			}
@@ -48,14 +72,21 @@ function checkStreams(data) {
 	}
 	
 	if (remStreams>0) {
-		bootbox.alert(`Streams removed: ${remStreams}`,_blank);
+		var remString = '';
+		console.log(remStream);
+		for ([index,stream] of remStream.entries()) {remString+= stream.channel.display_name+(remStream.length!=index+1?', ':'')}
+		bootbox.alert(`Streams removed: ${remStreams}<br><b>${remString}</b>`,_blank);
 		console.log('Removed stream?',removed);
+		console.log(remString);
 	}
 
 	changes = [storedS,data.streams,missing,added];
 	if (added.length>0) {
-		bootbox.alert(`Streams added: ${added.length}`,_blank);
+		var addString = '';
+		for ([index,stream] of added.entries()) {addString+= stream.channel.display_name+(added.length!=index+1?', ':'')}
+		bootbox.alert(`Streams added: ${added.length}<br><b>${addString}</b>`,_blank);
 		console.log('Streams added: ',added);
+		console.log(addString);
 	}
 	console.log('stored, data, missing, added',changes);
 
@@ -63,7 +94,7 @@ function checkStreams(data) {
 }
 
 function sortStreams() {
-	var $parent = $('body');
+	var $parent = $('.streamCards-container');
 
 	$parent.find('.streamCard').sort(function(a, b) {
 		return b.dataset.viewers - a.dataset.viewers;
@@ -74,7 +105,10 @@ function update(token,forced) {
 	var last = Number(localStorage.getItem('last_updated'));
 	var now = Math.floor((new Date().getTime())/1000);
 
+	$('.refresh').html('Next refresh: '+(imgRefresh-(Math.floor(performance.now()/1000)%imgRefresh)));
+
 	if (!last || Math.floor(performance.now()/1000)%imgRefresh==0 || !localStorage.getItem('stream') || forced && app.logged_in) {
+		if (!app.token || !app.token.key) {return;}
 		var storedStreams = JSON.parse(localStorage.getItem('stream'));
 		if (forced) {storedStreams = {};}
 		storedStreams = (!storedStreams ? storedStreams : storedStreams.streams);
@@ -82,29 +116,39 @@ function update(token,forced) {
 
 		var oauth_token = token;
 		var setStreams = function(d) {
+			for (var [i,s] of d.streams.entries()) {
+				if (s.broadcast_platform != 'live') {
+					d.streams.splice(i,1);
+				}
+			}
 			checkStreams(d);
 
-			app.setStream(d);
-
-			localStorage.setItem('stream',JSON.stringify(d));
+			// app.setStream(d);
 
 			//Loop through all streams data
 			for (var i in d.streams) {
 				var item = d.streams[i];
-				var name = item.channel.display_name;
-				
-				if (streams[name]) {
-					streams[name].update('data',item).update('uptime').update('display');
-				} else {
-					var stream = new Stream(item);
-					streams[name] = stream;
-					streams[name].update('uptime').update('display');
+				// For some fucked up reason other stream types are being gotten even tho we request only LIVE
+				if (item.broadcast_platform == 'live') {
+					var name = item.channel.display_name;
+					
+					if (streams[name]) {
+						streams[name].update('data',item,app).update('uptime',undefined,app).update('display',undefined,app);
+					} else {
+						var stream = new Stream(item,app);
+						streams[name] = stream;
+						streams[name].update('uptime',undefined,app).update('display',undefined,app);
+					}
 				}
 			}
 
+			localStorage.setItem('stream',JSON.stringify(d));
+			app.loadingAnimation(false);
 			sortStreams();
 		}
 		
+		app.loadingAnimation(true).updateStreams(forced || false);
+
 		$.ajax({
 		    url:`https://api.twitch.tv/kraken/streams/followed?stream_type=live&limit=100`,
 			headers:{
@@ -115,10 +159,7 @@ function update(token,forced) {
 		    type:'GET',
 		    dataType:'json',
 			success:setStreams,
-			error:function(err) {
-				bootbox.alert('There was an error requesting data from the API.');
-			    console.log(err);
-			}
+			error:(err) => {this.error(err,app)}
 		});
 	}
 
@@ -126,7 +167,7 @@ function update(token,forced) {
 		//Create all stream constructors and store them.
 		for (var i in storedStreams) {
 			var item = storedStreams[i];
-			var stream = new Stream(item);
+			var stream = new Stream(item,app);
 
 			streams[item.channel.display_name] = stream;
 		}
@@ -136,9 +177,10 @@ function update(token,forced) {
 		//Run update on images and uptime every second.
 		updateInterval = setInterval(function() {
 			for (var item in streams) {
-				streams[item].update('uptime').update('display');
+				streams[item].update('uptime',undefined,app).update('display',undefined,app);
 			}
 		},1000);
+		app.intervals.cardsUpdate = updateInterval;
 
 		var $parent = $('body');
 		$parent.find('.streamCard').sort(function(a, b) {
@@ -165,7 +207,7 @@ window.addEventListener('message',(event) => {
 		return false;
 	}
 
-	if (localStorage.getItem('logged_in') == true) {
+	if (localStorage.getItem('logged_in') == 'true' || app.logged_in) {
 		return false; // Ignore if already logged in.
 	}
 
@@ -177,8 +219,7 @@ window.addEventListener('message',(event) => {
 
 $(document).ready(() => {
 	app = new App();
-	app.load();
-	app.checkLogin(); // Check if a user has already connected.
+	app.load().checkLogin(); // Check if a user has already connected.
 
 	$('.login').click(() => {
 		var connected = $('.login').hasClass('connected');
@@ -190,6 +231,7 @@ $(document).ready(() => {
 				size:'small',
 				title:'Logout',
 				message:'Are you sure you want to log out?',
+				backdrop:true,
 				buttons:{
 					confirm:{
 						label:'Logout',

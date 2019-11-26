@@ -1,21 +1,62 @@
 body {
-    background-color: #2c2c2c !important;
+    background-color: #222 !important;
     font-family: Arial;
 	font-size: 12px;
-    --card-width: 320px;
+    --card-width: 350px;
+    --card-height: 305px;
+    /*--card-width: 18.9%;*/
+    /*--card-height: 315px;*/
 	--card-radious: 5px;
     cursor: default;
     user-select: none;
 }
 /* For refresh timer at top */
 .refresh {
-	color: White;
-	position: relative;
-	width: fit-content;
-	left: 0%;
-	margin: 10px 2px;
+    color: White;
+    position: sticky;
+    width: fit-content;
+    top: 0;
+    left: .4%;
+    margin: 0px 2px;
+    z-index: 100;
+    background-color: #000000c0;
+    padding: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+.refresh:empty {
+    visibility: hidden;
 }
 
+.clock-svg {
+    fill: #00000000;
+    display: block;
+    float: left;
+    width: 15px;
+    height: 15px;
+    user-select: none;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f11c; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #676666;
+  border-radius: 3px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
 
 .login {
 	color: White;
@@ -45,16 +86,26 @@ body {
 }
 
 
-
+.streamCardas-container {
+    position: relative;
+    top: 5px;
+}
+.streamCard.highlight {
+    box-shadow: 0px 0px 10px 1px #55bb41;
+}
+.streamCard.highlight .button-highlight {
+    background-color: #55bb41;
+}
 .streamCard {
-    width: 320px !important;
-	background-color: #333;
+    width: var(--card-width) !important;
+	background-color: #2e2e2e;
 	border-radius: 5px;
-    height: 268px;
+    height: var(--card-height);
     position: relative;
 	display: none;
 	margin: 5px 10px;
-	transition: background-color .5s;
+    box-shadow: none;
+	transition: background-color .5s, box-shadow .5s;
 }
 
 .streamCard:hover {
@@ -71,8 +122,8 @@ body {
 
 /* Start of cardHead */
 .cardHead {
-    width: var(--card-width);
-    height: 180px;
+    width: 100%;
+    height: 64.3%;
     position: relative;
 }
 .cardHead-stream_preview {
@@ -83,29 +134,68 @@ body {
 }
 .cardHead-overlay {
 	pointer-events: none;
-    width: var(--card-width);
+    width: 100%;
     height: 100%;
     position: relative;
 }
+/* Stats display */
+.cardHead-overlay .stream-stats {
+    color: #eee;
+    opacity: 0;
+    pointer-events: all;
+    user-select: text;
+    position: absolute;
+    height: 18px;
+    margin: 8px 10px;
+    background-color: #000000a0;
+    padding: 1px 5px;
+    border-radius: var(--card-radious);
+    transition: all .3s;
+}
+.streamCard:hover .stream-stats {
+    opacity: 1;
+}
+.streamCard .follow-age {
+    font-weight: bolder;
+}
+.streamCard .views {
+    float: right;
+    padding-left: 3px;
+}
+.streamCard .views-svg-container {
+    display: inline-block;
+    float: left;
+    width: 15px;
+    height: 15px;
+    overflow: hidden;
+}
+
 .cardHead-overlay_bottomEffect {
-    width: var(--card-width);
+    width: 100%;
     height: 25%;
     left: 0;
     bottom: 0;
     position: absolute;
     background-image: linear-gradient(#00000000, #000000e0);
 }
+/* Uptime display*/
 .cardHead-overlay_uptime {
 	color: #eee;
 	pointer-events: all;
 	user-select: text;
     position: absolute;
+    height: 18px;
     right: 0;
     margin: 8px 10px;
     background-color: #00000080;
     padding: 1px 5px;
     border-radius: var(--card-radious);
 }
+.cardHead-overlay_uptime .uptime {
+    float: left;
+    padding-left: 3px;
+}
+/* Viewers display */
 .cardHead-overlay_viewers {
 	color: #eee;
 	pointer-events: all;
@@ -115,6 +205,13 @@ body {
     bottom: 0;
     padding: 8px;
 }
+/* Edits to views svg in viewers container*/
+.cardHead-overlay_viewers .views-svg-container {
+    margin-right: 3px;
+}
+.cardHead-overlay_viewers .views-svg-container svg {
+    fill: #d22f2f !important;
+}
 
 
 /* End of cardHead */
@@ -123,18 +220,17 @@ body {
 
 /* Start of cardBody */
 .cardBody {
-    height: 80px;
-    margin-top: 3px;
+    height: 35.7%;
     position: relative;
-	padding: 2px;
+	padding: 3px;
 }
 .cardBody-top {
-	height: 63%;
+	height: 54%;
 }
 .cardBody-left {
     float: left;
-    width: 50px;
-    height: 100%;
+    width: 15.924%
+    display: inline-block;
 }
 .cardBody-left_logoImage {
     width: 50px;
@@ -144,22 +240,22 @@ body {
 }
 .cardBody-right {
     float: left;
-    height: 50px;
-    width: 260px;
+    height: 100%;
+    width: 82%;
+    margin-left: 1.86%;
 	user-select: text;
 }
 .cardBody-right_text {
-	width: 250px;
+	width: 100%;
     float: left;
-    margin-left: 10px;
 }
 .cardBody-rt {
-    width: 255px;
     font-size: 13px;
     font-weight: 1000;
 	color: #ccc;
 }
-.cardBody-rt, .cardBody-rd {
+.cardBody-rt, .cardBody-rd, .cardBody-rn {
+    width: inherit;
 	white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -183,8 +279,117 @@ body {
 
 .cardBody-bottom {
 	position: relative;
-	height: 37%;
+	height: 45%;
+    margin-top: 1%;
+    padding: 0px 5px 0px 5px;
 }
-.cardBody-button-removetest {
-	margin: 5px;
+.stream-stats button {
+    float: left;
+}
+.stream-stats .notifications {
+    display: inline-block;
+    position: relative;
+    float: left;
+    left: 4%;
+    padding: 1px 3px;
+    margin: 2px 1px;
+    background-color: #bf1e1e;
+    border-radius: 3px;
+    color: white;
+}
+.stream-stats .notifications.active {
+    background-color: green;
+}
+.cardBody-bottom .follow-age {
+    color: #9f9da8;
+}
+.cardBody-button {
+	margin: 0px 5px;
+}
+
+
+
+body[logged_in="true"] .streamCards-container[loading="false"] .no-content-container:only-child .no-content-text {
+    opacity: 1 !important;
+}
+.streamCards-container[loading="true"] .twitch-loading-icon {
+    opacity: 1 !important;
+}
+.no-content-text {
+    opacity: 0;
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 30%;
+    color: #bbb;
+    font-size: 18px;
+    font-style: italic;
+    transform: translatex(-50%);
+}
+
+.twitch-loading-icon {
+    opacity: 0;
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translatex(-50%);
+    width: 55px;
+    height: 70px;
+    overflow: hidden;
+    font-size: 12px;
+    font-style: normal;
+    color: White;
+}
+.twitch-loading-icon:after {
+    content: 'Loading...';
+    position: absolute;
+    float: left;
+    top: 80%;
+    left: 50%;
+    transform: translatex(-50%);
+    animation: loading-content 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+.twitch-loading-icon svg {
+    fill: #7351a0;
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translatex(-50%);
+    animation: twitch-loading 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+@keyframes twitch-loading {
+    0% {
+        transform: translate(-50%,0px);
+    }
+    25% {
+        transform: translate(-50%,-20px);
+    }
+    40% {
+        transform: translate(-50%,10px);
+    }
+    50% {
+        transform: translate(-50%,-10px);
+    }
+    60% {
+        transform: translate(-50%,5px);
+    }
+    70% {
+        transform: translate(-50%,0px);
+    }
+}
+@keyframes loading-content {
+    25% {
+        content: 'Loading';
+    }
+    45% {
+        content: 'Loading.';
+    }
+    65% {
+        content: 'Loading..';
+    }
+    85% {
+        content: 'Loading...';
+    }
 }
