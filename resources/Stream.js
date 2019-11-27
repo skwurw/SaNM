@@ -148,6 +148,7 @@ Stream.prototype.remove = function(app) {
 
 	var find = app.streams.streams.findIndex(x => {return x.channel.display_name == name});
 	app.streams.streams.splice(find,1);
+	app.save();
 
 	// delete streams[name];
 	

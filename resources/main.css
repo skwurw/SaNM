@@ -275,7 +275,7 @@ body {
     color: #9d63f3 !important;
 }
 .cardBody-rt, .cardBody-rd, .cardBody-rn {
-    width: inherit;
+    width: fit-content;
 	white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

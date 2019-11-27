@@ -350,7 +350,7 @@ App.prototype.updateStreams = function(forced) {
 			var newStreams = data.streams;
 			var added = newStreams.filter(compare(oldStreams)); // Get how many objects are added
 		    var removed = oldStreams.filter(compare(newStreams)); // Get how many objects are removed
-			var streamInfo = {};
+			// var streamInfo;
 		    this.streams._constructs = this.streams._constructs || {};
 
 		    for (var _stream of data.streams) {
@@ -363,21 +363,23 @@ App.prototype.updateStreams = function(forced) {
 			    	} else {
 			    		this.streams._constructs[name].update('data',_stream,this).update('uptime',undefined,this).update('display',undefined,this);
 			    	}
+				    
+				    if (this.followedInfo[user] && this.settings.liveStats.value) {
+						if (!this.followedInfo[user].liveStats) {
+							this.followedInfo[user].liveStats = {};
+						}
+
+						var streamInfo = {};
+						streamInfo.started_at = _stream.created_at;
+						streamInfo.finished_at = new Date().toISOString(); // Assume the end time of the stream, will update every time until stream with ID is offline/ended
+						streamInfo.length = Math.floor((new Date(streamInfo.finished_at).getTime()-new Date(streamInfo.started_at).getTime())/1000);
+						this.followedInfo[user].liveStats[name] = this.followedInfo[user].liveStats[name] || {};
+						this.followedInfo[user].liveStats[name][_stream._id] = streamInfo;
+					}
 			    } else {
 			    	console.log('Not live stream ',_stream);
 			    }
 			    
-			    if (this.followedInfo[user] && this.settings.liveStats.value) {
-					if (!this.followedInfo[user].liveStats) {
-						this.followedInfo[user].liveStats = {};
-					}
-
-					streamInfo.started_at = _stream.created_at;
-					streamInfo.finished_at = new Date().toISOString(); // Assume the end time of the stream, will update every time until stream with ID is offline/ended
-					streamInfo.length = Math.floor((new Date(streamInfo.finished_at).getTime()-new Date(streamInfo.started_at).getTime())/1000);
-					this.followedInfo[user].liveStats[name] = this.followedInfo[user].liveStats[name] || {};
-					this.followedInfo[user].liveStats[name][_stream._id] = streamInfo;
-				}
 		    }
 
 
