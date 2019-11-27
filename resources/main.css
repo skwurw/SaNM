@@ -252,6 +252,28 @@ body {
     font-weight: 1000;
 	color: #ccc;
 }
+.cardBody-rt::after {
+    display: inline-block;
+    position: absolute;
+    content: attr(data-title);
+    float: left;
+    width: fit-content;
+    max-width: 82%;
+    left: 56px;
+    padding: 0px 4px;
+    z-index: 100;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .2s;
+}
+.cardBody-rt:hover::after {
+    opacity: 1;
+    background-color: #232323;
+    color: #9d63f3 !important;
+}
 .cardBody-rt, .cardBody-rd, .cardBody-rn {
     width: inherit;
 	white-space: nowrap;

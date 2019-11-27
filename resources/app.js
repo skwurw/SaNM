@@ -3,6 +3,12 @@
 var App = function(version) {
 	this.version = '1.0.1';
 	this.askScopes = ['user_read','user_follows_edit'];
+	this.settings = {
+		liveStats:{
+			description:'Track the time at which streams are started and ended. Only works when you view the site',
+			value:false
+		}
+	}
 
 	this._id = 'ea6gna29yeekmgxv3wezbvh9gdhkdf';
 	this.logged_in = false;
@@ -43,7 +49,11 @@ App.prototype.load = function() {
 			streams:(appData.streams?(!appData.streams.streams.length?this.streams.streams:appData.streams.streams):this.streams.streams),
 			_constructs:this.streams._constructs
 		};
-		// this.streams = appData.streams || this.streams;
+		// Loop through settings to update descriptions, only update value if its not provided
+		for (var setting in this.settings) {
+			this.settings[setting].description = this.settings[setting].description;
+			this.settings[setting].value = (appData.settings?appData.settings[setting].value || this.settings[setting].value:this.settings[setting].value);
+		}
 		this.logged_in = appData.logged_in || this.logged_in;
 		this.user = appData.user || this.user;
 		this.followedInfo = appData.followedInfo || this.followedInfo;
@@ -103,6 +113,7 @@ App.prototype.setUser = function(user,token) {
 				this.followedInfo[this.user._id] = {
 					data:{},
 					updated_at:0,
+					liveStats:{}
 				}
 			}
 			
@@ -251,6 +262,29 @@ App.prototype.checkLogin = function(init) {
 	return this;
 }
 
+App.prototype.updateStreamStats = function() {
+	var user = this.user._id;
+	if (this.followedInfo[user] && this.settings.liveStats.value) {
+		if (!this.followedInfo[user].liveStats) {
+			this.followedInfo[user].liveStats = {};
+		}
+
+		for (var _stream of this.streams.streams) {
+			var streamInfo = {};
+			var name = _stream.channel.display_name;
+			streamInfo.started_at = _stream.created_at;
+			streamInfo.started_day = new Date(streamInfo.started_at).getDay();
+			streamInfo.finished_at = new Date().toISOString(); // Assume the end time of the stream, will update every time until stream with ID is offline/ended
+			streamInfo.length = Math.floor((new Date(streamInfo.finished_at).getTime()-new Date(streamInfo.started_at).getTime())/1000);
+			this.followedInfo[user].liveStats[name] = this.followedInfo[user].liveStats[name] || {};
+			this.followedInfo[user].liveStats[name][_stream._id] = streamInfo;
+		}
+
+		this.save();
+	}
+
+	return this;
+}
 
 App.prototype.updateStreams = function(forced) {
 	var now = new Date().getTime();
@@ -302,7 +336,7 @@ App.prototype.updateStreams = function(forced) {
 		    	console.log('remove!',_removed)
 		    	for (var [index,item] of _removed.entries()) {
 		    		var lastIndex = (index+1)!=_removed.length;
-		    		removedStreamNames += (!lastIndex&&_removed.length!=1?'and ':'')+item.channel.display_name+(lastIndex&&_remove.length!=1?', ':'');
+		    		removedStreamNames += (!lastIndex&&_removed.length!=1?'and ':'')+item.channel.display_name+(lastIndex&&_removed.length!=1?', ':'');
 		    		
 		    		var item = _app.streams._constructs[item.channel.display_name];
 		    		if (item) {
@@ -360,11 +394,9 @@ App.prototype.updateStreams = function(forced) {
 		    alertChanges(this,removed,added,forced);
 		    // Sort stream elements
 		    sortStreams();
-
-
 			this.streams.streams = data.streams;
 
-			this.save().loadingAnimation(false);
+			this.save().loadingAnimation(false).updateStreamStats();
 		}).fail((err) => {this.error(err,this)});
 
 		if (!this.intervals.cardsUpdate) {
@@ -389,6 +421,7 @@ App.prototype.updateFollowedInfo = function(forced) {
 			this.followedInfo[this.user._id] = {
 				data:{},
 				updated_at:0,
+				liveStats:{}
 			}
 		}
 

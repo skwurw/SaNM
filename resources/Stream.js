@@ -96,7 +96,7 @@ Stream.prototype.update = function(type,data,app) {
 			var startTime = new Date(this.info.video.started_at).toLocaleTimeString();
 			var gameLink = `<a href="https://www.twitch.tv/directory/game/${game}" target="_blank" rel="noopener" class="cardBody-link">${game}</a>`;
 			var streamLink = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link">${channel}</a>`;
-			var streamTitle = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link">${this.info.status}</a>`;
+			var streamTitle = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link"></a>`;
 			previewEle.attr('lastUpdate',perfTime);
 
 			$(this.element).data('viewers',this.info.viewers);
@@ -105,7 +105,8 @@ Stream.prototype.update = function(type,data,app) {
 			$(this.element).attr('data-viewers',this.info.viewers);
 			
 			$('[data-user="'+this.info.name+'"] .cardBody-rt').html(streamTitle);
-			$('[data-user="'+this.info.name+'"] .cardBody-rt').attr('title',this.info.status);
+			$('[data-user="'+this.info.name+'"] .cardBody-rt a').text(this.info.status);
+			$('[data-user="'+this.info.name+'"] .cardBody-rt').attr('data-title',this.info.status);
 			$('[data-user="'+this.info.name+'"] .cardBody-rn').html(streamLink);
 			$('[data-user="'+this.info.name+'"] .cardBody-rd').html('Playing '+gameLink);
 			
