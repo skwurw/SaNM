@@ -333,6 +333,7 @@ App.prototype.updateStreams = function(forced) {
 		    	message += addedStreamNames?`Streams added: ${_added.length}<br><b>${addedStreamNames}</b>`:'';
 		    	message += (addedStreamNames&&removedStreamNames?'<br><br>':'');
 		    	message += removedStreamNames?`Streams removed: ${_removed.length}<br><b>${removedStreamNames}</b>`:'';
+		    	// console.log(message);
 
 		    	var bootboxAlert = {
 					title:'Changes to streams',

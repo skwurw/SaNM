@@ -247,4 +247,14 @@ $(document).ready(() => {
 			}});
 		}
 	});
+
+
+	// Make streamCards container width dynamic to try and fit as many elements on screen along as making them centered
+	var updateWidth = function() {
+		var container = $(window);
+		var width = Math.floor(container.width()/370);
+		$('.streamCards-container').width(width*370);
+	}
+	updateWidth();
+	$(window).on('resize',updateWidth);
 });

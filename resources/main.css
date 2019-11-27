@@ -84,9 +84,11 @@ body {
 }
 
 
-.streamCardas-container {
+.streamCards-container {
     position: relative;
     top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 .streamCard.highlight {
     box-shadow: 0px 0px 10px 1px #55bb41;
@@ -123,12 +125,14 @@ body {
     width: 100%;
     height: 64.3%;
     position: relative;
+    background-color: black;
+    border-radius: var(--card-radious);
 }
 .cardHead-stream_preview {
     position:absolute;
-    left: 0;
+    left: 50%;
     top: 0;
-    border-radius: var(--card-radious);
+    transform: translateX(-50%);
 }
 .cardHead-overlay {
 	pointer-events: none;
@@ -276,6 +280,7 @@ body {
 }
 .cardBody-rt, .cardBody-rd, .cardBody-rn {
     width: fit-content;
+    max-width: 100%;
 	white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

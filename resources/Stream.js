@@ -111,7 +111,7 @@ Stream.prototype.update = function(type,data,app) {
 			$('[data-user="'+this.info.name+'"] .cardBody-rd').html('Playing '+gameLink);
 			
 			$('[data-user="'+this.info.name+'"] .cardHead-overlay_uptime').attr('title',`Started at: ${startTime}`);
-			$('[data-user="'+this.info.name+'"] .cardHead-stream_preview').attr('src',preview);
+			$('[data-user="'+this.info.name+'"] .cardHead-stream_preview').attr('src',preview.replace(/\s/g,''));
 			$('[data-user="'+this.info.name+'"] .cardBody-left_logoImage').attr('src',logo);
 			$('[data-user="'+this.info.name+'"] .cardHead-overlay_viewers span').html(this.info.viewers.toLocaleString());
 		}
