@@ -118,20 +118,23 @@ Stream.prototype.update = function(type,data,app) {
 		var game = this.info.game;
 		var channel = this.info.name;
 		var startTime = new Date(this.info.video.started_at).toLocaleTimeString();
-		var gameLink = `<a href="https://www.twitch.tv/directory/game/${game}" target="_blank" rel="noopener" class="cardBody-link">${game}</a>`;
-		var streamLink = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link">${channel}</a>`;
-		var streamTitle = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link"></a>`;
+		var gameLink = `<a href="https://www.twitch.tv/directory/game/${game}" target="_blank" rel="noopener" class="cardBody-link" tabindex="-1">${game}</a>`;
+		var streamLink = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link" tabindex="-1">${channel}</a>`;
+		var streamTitle = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link" tabindex="-1"></a>`;
 		
 		// Metadata
-		$(this.element).data('viewers',this.info.viewers);
-		$(this.element).data('stream_type',this.info.type);
-		$(this.element).find('.cardHead-overlay_viewers span').html(this.info.viewers);
-		$(this.element).attr('data-viewers',this.info.viewers);
-		
+		$(this.element).data('viewers',this.info.viewers)
+			.data('stream_type',this.info.type)
+			.attr('data-viewers',this.info.viewers)
+			.find('.cardHead-overlay_viewers span')
+				.html(this.info.viewers);
+
 		// Card body
-		$(this.element).find('.cardBody-rt').html(streamTitle);
-		$(this.element).find('.cardBody-rt a').text(this.info.status);
-		$(this.element).find('.cardBody-rt').attr('data-title',this.info.status);
+		$(this.element).find('.cardBody-rt')
+			.attr('data-title',this.info.status)
+			.html(streamTitle)
+			.find('a')
+			.text(this.info.status);
 		$(this.element).find('.cardBody-rn').html(streamLink);
 		$(this.element).find('.cardBody-rd').html('Playing '+gameLink);
 		
@@ -182,7 +185,9 @@ Stream.prototype.remove = function(app) {
 	delete app.streams._constructs[name];
 
 	var find = app.streams.streams.findIndex(x => {return x.channel.display_name == name});
-	app.streams.streams.splice(find,1);
+	if (find) {
+		app.streams.streams.splice(find,1);
+	}
 	app.save();
 
 	// delete streams[name];

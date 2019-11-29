@@ -138,9 +138,12 @@ body {
     background-color: black;
     border-radius-top: var(--card-radious);
     overflow: hidden;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 
     background-image: url('/resources/bg_glitch_pattern.png');
     background-repeat: repeat-x;
+    background-position: 23px 0px;
 }
 .cardHead-stream_preview {
     position:absolute;
@@ -178,6 +181,8 @@ body {
 .cardHead-preview_loading.cardHead-preview_loading_fail::before {
     content: 'Preview failed to load';
     text-align: center;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
     width: 51%;
 }
 .cardHead-preview_loading.cardHead-preview_loading_fail:hover::before {

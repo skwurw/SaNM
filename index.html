@@ -12,21 +12,24 @@
 
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></link>
 		<link rel="stylesheet" type="text/css" href="resources/main.css">
+		<link rel="manifest" href="resources/manifest.json">
 	</head>
 	<body logged_in="false">
 		<div class='refresh'></div>
 		<div class='login'>
-			<button class='login-button' title='Connect with twitch'>
+			<button class='login-button' title='Connect with twitch' tabindex="-1">
 				<image class='login-button_image' alt='login_image' src='resources/connect.png'></image>
 			</button>
 			<div class='login-user-contents'>
 				<div class='login-user-contents_name'>test</div>
-				<input class="search-streamCards" type="text" name="search" placeholder="Search Cards">
+				<label>
+					<input class="search-streamCards" type="text"name="search" placeholder="Search Cards" tabindex="100">
+				</label>
 			</div>
 		</div>
 		<div class='streamCard' data-user="" type='streamcard-template'>
 			<div class='cardHead'>
-				<a href="" class="cardHead-preview_link" target="_blank" rel="noopener">
+				<a href="" class="cardHead-preview_link" target="_blank" rel="noopener" tabindex="-1">
 					<image class="cardHead-stream_preview" src="" alt="stream_preview"/>
 				</a>
 				<div class='cardHead-overlay'>
@@ -94,8 +97,8 @@
 					<!-- 			House Follow Age and update Notifications. -->
 					<div class="stream-stats">
 						<span class="follow-age">Followed <span>unknown</span> ago</span><br>
-						<button class='cardBody-button-removetest'>Remove Card</button>
-						<button class='cardBody-button button-highlight'>Highlight</button>
+						<button class='cardBody-button-removetest' tabindex="-1">Remove Card</button>
+						<button class='cardBody-button button-highlight' tabindex="-1">Highlight</button>
 						<div class="notifications">Notifications</div>
 					</div>
 				</div>

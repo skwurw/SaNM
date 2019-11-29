@@ -309,7 +309,7 @@ App.prototype.updateStreams = function(forced) {
 		    }
 		    if (_added.length) {
 		    	for (var [index,item] of _added.entries()) {
-		    		if (item.broadcast_platform=='live') { // Make sure if we are alerting for new streams they are live
+		    		if (item.broadcast_platform=='live') { // Make sure if we are alerting for new streams that are live
 			    		var lastIndex = (index+1)!=_added.length;
 			    		addedStreamNames += (!lastIndex&&_added.length!=1?'and ':'')+item.channel.display_name+(lastIndex&&_added.length!=1?', ':'');
 			    	} else {
@@ -372,8 +372,12 @@ App.prototype.updateStreams = function(forced) {
 			    	// Find any reruns and remove them from added
 			    	var _find = added.findIndex((x) => {return x.broadcast_platform == 'rerun'});
 			    	if (_find>-1) {added.splice(_find,1);}
+			    	if (this.streams._constructs[_stream.channel.display_name]) {
+			    		this.streams._constructs[_stream.channel.display_name].remove(this)
+			    		removed.push(_stream);
+			    	}
 			    	var _g='color:lime;',_y='color:yellow',_w='color:default;';
-			    	data.streams.splice(index,1);
+			    	// data.streams.splice(index,1);
 			    	console.log(`Stream for%c ${_stream.channel.display_name} %cis not live and is rather a%c ${_stream.broadcast_platform} %cinstead.`,_g,_w,_y,_w,_stream);
 			    }
 			    
