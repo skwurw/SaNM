@@ -391,8 +391,9 @@ App.prototype.updateStreams = function(forced) {
 		    // Sort stream elements
 		    sortStreams();
 			this.streams.streams = data.streams;
+			this.events.dispatchEvent(new CustomEvent('streams_update'));
 
-			this.save().loadingAnimation(false)
+			this.save().loadingAnimation(false);
 		}).fail((err) => {this.error(err,this)});
 
 		if (!this.intervals.cardsUpdate) {
@@ -494,11 +495,6 @@ App.prototype.updateFollowedInfo = function(forced) {
 
 App.prototype.loadingAnimation = function(state) {
 	$('.streamCards-container').attr('loading',state || false);
-
-	// Also update search
-	var searchAlert = $('.search-content-none');
-	searchAlert.html('');
-	searchAlert.css({'opacity':'0'});
 
 	return this;
 }

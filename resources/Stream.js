@@ -77,6 +77,12 @@ var Stream = function(data,app) {
 			.find('.cardHead-stream_preview')
 			.show();
 		// console.log(`Preview for ${this.info.name} loaded after ${loadTime}s`);
+	}).on('error',() => {
+		if (this.preview_timeout) {
+			clearTimeout(this.preview_timeout);
+			this.preview_timeout = 0;
+			this.previewTimeout();
+		}
 	});
 
 	
@@ -188,13 +194,7 @@ Stream.prototype.remove = function(app) {
 	if (find) {
 		app.streams.streams.splice(find,1);
 	}
-	app.save();
-
-	// delete streams[name];
 	
-	// var streamsUpdate = JSON.parse(localStorage.getItem('stream'));
-	// var find = streamsUpdate.streams.findIndex((x) => {return x.channel.display_name == this.info.name;});
-	// streamsUpdate.streams.splice(find,1);
-	// streamsUpdate._total = Object.keys(streams).length;
-	// localStorage.setItem('stream',JSON.stringify(streamsUpdate));
+	app.events.dispatchEvent(new CustomEvent('streams_update'));
+	app.save();
 }

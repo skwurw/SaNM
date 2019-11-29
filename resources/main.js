@@ -107,12 +107,17 @@ $(document).ready(() => {
 		$('.login').removeClass('connected');
 		$('body').attr('logged_in',false);
 		$('.login-user-contents').html('');
+	}).on('streams_update', () => {
+		console.log('streams_update');
+		var searchAlert = $('.search-streamCards');
+		searchAlert.change();
 	});
 	// Load app after setting up UI login and event listener for logging in.
 	app.load().checkLogin();
 
 
-	var _found;
+	// Searching funciton
+	var _found, searchTimeout;
 	var querySearch = function(search) {
 		$('.streamCard').filter((i) => {
 			var cards = $($('.streamCard')[i]), name = cards.attr('data-user');
@@ -130,18 +135,19 @@ $(document).ready(() => {
 			searchAlert.css({'opacity':'0'});
 		}
 	}
-
-	var searchTimeout;
-	$('.search-streamCards').on('keyup',(el) => {
+	var _search = function(el) {
 		clearTimeout(searchTimeout);
 		var search = $(el.target).val();
 		_found = false;
+
 		if (search != '') {
 			searchTimeout = setTimeout(querySearch.bind(null,search),300);
 		} else {
 			querySearch(search);
 		}
-	});
+	}
+
+	$('.search-streamCards').on('change',_search).on('input',_search);
 
 	// Make streamCards container width dynamic to try and fit as many elements on screen along as making them centered
 	var updateWidth = function() {
