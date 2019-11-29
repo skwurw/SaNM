@@ -39,9 +39,14 @@ var Stream = function(data,app) {
 
 	var stats = $(this.element).find('.stream-stats');
 	if (this.info.data) {
-		var notifications_title = `You have notifications ${this.info.data.notifications?"enabled":"disabled"} for ${this.info.name}`;
-		stats.find('.notifications').addClass((this.info.data.notifications?'active':'')).attr('title',notifications_title)
-		stats.find('.follow-age span').html(this.info.data.followed_tooltip.full).attr('title','Followed on '+new Date(this.info.data.followed_at).toLocaleString());
+		var notifications_title = `You have Notifications ${this.info.data.notifications?"Enabled":"Disabled"} for ${this.info.name}`;
+		stats.find('.notifications')
+			.addClass((this.info.data.notifications?'active':''))
+			.attr('data-title',notifications_title);
+		stats.find('.follow-age span')
+			.html(this.info.data.followed_tooltip.full)
+			.attr('title','Followed on '+new Date(this.info.data.followed_at)
+			.toLocaleString());
 	} else {
 		$(this.element).find('.follow-age').css('visibility','hidden');
 		$(this.element).find('.notifications').css('visibility','hidden');
@@ -54,8 +59,33 @@ var Stream = function(data,app) {
 	// For testing, highlighting cards
 	$(this.element).find('.cardBody-button.button-highlight').click((el) => {$(this.element).toggleClass('highlight')});
 	
-	$('.streamCards-container').append(this.element);
+	var logo = this.info.logo;
+	$(this.element).find('.cardBody-left_logoImage').attr('src',logo);
 
+
+	// Way to track image loading
+	this.stream_preview_load = new Date().getTime();
+	this.preview_loadtime = 8; // How long before we cancel loading the preview
+	this.preview_timeout = setTimeout(() => {this.previewTimeout()},this.preview_loadtime*1000);
+	$(this.element).find('.cardHead-stream_preview').on('load',(element) => {
+		var loadTime = (new Date().getTime()-this.stream_preview_load)/1000;
+		clearTimeout(this.preview_timeout);
+		$(this.element)
+			.find('.cardHead-preview_loading')
+			.removeClass('cardHead-preview_loading_fail')
+			.toggleClass()
+			.find('.cardHead-stream_preview')
+			.show();
+		// console.log(`Preview for ${this.info.name} loaded after ${loadTime}s`);
+	});
+
+	
+	$('.streamCards-container').append(this.element);
+}
+Stream.prototype.previewTimeout = function() {	
+	var loadTime = (new Date().getTime()-this.stream_preview_load)/1000;
+	console.log(`%cPreview for ${this.info.name} failed after ${loadTime}s`,'color: #f33;');
+	$(this.element).find('.cardHead-stream_preview').attr('src','http://').hide().parent().addClass('cardHead-preview_loading_fail');
 }
 
 //Update info about the constructor like uptime.
@@ -77,44 +107,49 @@ Stream.prototype.update = function(type,data,app) {
 			ss:secs
 		};
 
-		$('[data-user="'+this.info.name+'"] .cardHead-overlay_uptime div').html(`${hours}:${mins}:${secs}`);
+		$(this.element).find('.cardHead-overlay_uptime div').html(`${hours}:${mins}:${secs}`);
 	} else if (type == 'display') {
-		var previewEle = $('[data-user="'+this.info.name+'"] .cardHead-stream_preview');
-		var lastUpdate = Number(previewEle.attr('lastUpdate'));
 		var perfTime = Math.floor(performance.now()/1000);
 		var docWidth = $(document).width();
 		var imgWidth = 350;
 		var imgHeight = Math.floor(imgWidth*.5625);
 		var preview = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.info.name.toLowerCase()}-${imgWidth}x${imgHeight}.jpg?p=${perfTime}`;
-		var logo = this.info.logo;
 
-		var streamLUD = Math.floor((new Date().getTime()-app.streams.last_updated)/1000);
-		//Update display to refresh image cache every so often.
-		if (!lastUpdate || streamLUD>=100+app.streams.updateRate || streamLUD==0) {
-			var game = this.info.game;
-			var channel = this.info.name;
-			var startTime = new Date(this.info.video.started_at).toLocaleTimeString();
-			var gameLink = `<a href="https://www.twitch.tv/directory/game/${game}" target="_blank" rel="noopener" class="cardBody-link">${game}</a>`;
-			var streamLink = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link">${channel}</a>`;
-			var streamTitle = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link"></a>`;
-			previewEle.attr('lastUpdate',perfTime);
+		var game = this.info.game;
+		var channel = this.info.name;
+		var startTime = new Date(this.info.video.started_at).toLocaleTimeString();
+		var gameLink = `<a href="https://www.twitch.tv/directory/game/${game}" target="_blank" rel="noopener" class="cardBody-link">${game}</a>`;
+		var streamLink = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link">${channel}</a>`;
+		var streamTitle = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link"></a>`;
+		
+		// Metadata
+		$(this.element).data('viewers',this.info.viewers);
+		$(this.element).data('stream_type',this.info.type);
+		$(this.element).find('.cardHead-overlay_viewers span').html(this.info.viewers);
+		$(this.element).attr('data-viewers',this.info.viewers);
+		
+		// Card body
+		$(this.element).find('.cardBody-rt').html(streamTitle);
+		$(this.element).find('.cardBody-rt a').text(this.info.status);
+		$(this.element).find('.cardBody-rt').attr('data-title',this.info.status);
+		$(this.element).find('.cardBody-rn').html(streamLink);
+		$(this.element).find('.cardBody-rd').html('Playing '+gameLink);
+		
+		// Preview timeout
+		clearTimeout(this.preview_timeout);
+		this.stream_preview_load = new Date().getTime();
+		this.preview_timeout = setTimeout(() => {this.previewTimeout()},this.preview_loadtime*1000);
+		$(this.element).find('.cardHead-stream_preview')
+			.attr('src',preview.replace(/\s/g,''))
+			.parent()
+			.addClass('cardHead-preview_loading')
+			.removeClass('cardHead-preview_loading_fail')
+			.attr('href',`https://www.twitch.tv/${channel}`);
 
-			$(this.element).data('viewers',this.info.viewers);
-			$(this.element).data('stream_type',this.info.type);
-			$(this.element).find('.cardHead-overlay_viewers span').html(this.info.viewers);
-			$(this.element).attr('data-viewers',this.info.viewers);
-			
-			$('[data-user="'+this.info.name+'"] .cardBody-rt').html(streamTitle);
-			$('[data-user="'+this.info.name+'"] .cardBody-rt a').text(this.info.status);
-			$('[data-user="'+this.info.name+'"] .cardBody-rt').attr('data-title',this.info.status);
-			$('[data-user="'+this.info.name+'"] .cardBody-rn').html(streamLink);
-			$('[data-user="'+this.info.name+'"] .cardBody-rd').html('Playing '+gameLink);
-			
-			$('[data-user="'+this.info.name+'"] .cardHead-overlay_uptime').attr('title',`Started at: ${startTime}`);
-			$('[data-user="'+this.info.name+'"] .cardHead-stream_preview').attr('src',preview.replace(/\s/g,''));
-			$('[data-user="'+this.info.name+'"] .cardBody-left_logoImage').attr('src',logo);
-			$('[data-user="'+this.info.name+'"] .cardHead-overlay_viewers span').html(this.info.viewers.toLocaleString());
-		}
+		// Card Head
+		$(this.element).find('.cardHead-overlay_uptime').attr('title',`Started at: ${startTime}`);
+		$(this.element).find('.cardHead-overlay_viewers span').html(this.info.viewers.toLocaleString());
+		// }
 	} else if (type == 'data') {
 		this.info = {
 			name:data.channel.display_name,

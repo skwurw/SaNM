@@ -7,6 +7,11 @@ body {
 	--card-radious: 5px;
     cursor: default;
     user-select: none;
+
+    overflow-x: hidden;
+}
+[type="streamcard-template"] {
+    display: none !important;
 }
 /* For refresh timer at top */
 .refresh {
@@ -82,13 +87,18 @@ body {
 .login .login-button:focus {
 	outline: none;
 }
+.login .search-streamCards {
+    color: Black;
+    width: 120px;
+}
 
 
 .streamCards-container {
     position: relative;
-    top: 5px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
+    transition: width .6s;
 }
 .streamCard.highlight {
     box-shadow: 0px 0px 10px 1px #55bb41;
@@ -126,7 +136,11 @@ body {
     height: 64.3%;
     position: relative;
     background-color: black;
-    border-radius: var(--card-radious);
+    border-radius-top: var(--card-radious);
+    overflow: hidden;
+
+    background-image: url('/resources/bg_glitch_pattern.png');
+    background-repeat: repeat-x;
 }
 .cardHead-stream_preview {
     position:absolute;
@@ -134,6 +148,71 @@ body {
     top: 0;
     transform: translateX(-50%);
 }
+
+
+.cardHead-preview_loading::before {
+    content: 'Loading preview...';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    width: fit-content;
+    height: fit-content;
+    color: #c3c3c3;
+    font-size: 18px;
+    background-color: #00000000;
+    transition: background-color .4s;
+}
+.cardHead-preview_loading::after {
+    content: '';
+    position: absolute;
+    left: 75%;
+    top: 57%;
+    transform: translate(-50%,-50%);
+    width: 0%;
+    height: 1%;
+    z-index: 9;
+    animation: preview_loading 2s cubic-bezier(0.15, 0, 0.85, 1) infinite;
+    background-color: #9d63f3;
+}
+.cardHead-preview_loading.cardHead-preview_loading_fail::before {
+    content: 'Preview failed to load';
+    text-align: center;
+    width: 51%;
+}
+.cardHead-preview_loading.cardHead-preview_loading_fail:hover::before {
+    background-color: #ff000030;
+}
+.cardHead-preview_loading.cardHead-preview_loading_fail::after {
+    background-color: red !important;
+    animation: none;
+    width: 51%;
+    left: 50%;
+}
+
+@keyframes preview_loading {
+    0% {
+        left: 75%;
+        width: 1%;
+    }
+    25% {
+        left: 50%;
+        width: 20%;
+    }
+    50% {
+        left: 25%;
+        width: 1%;
+    }
+    75% {
+        left: 50%;
+        width: 20%;
+    }
+    100% {
+        left: 75%;
+        width: 1%;
+    }
+}
+
 .cardHead-overlay {
 	pointer-events: none;
     width: 100%;
@@ -322,6 +401,45 @@ body {
     border-radius: 3px;
     color: white;
 }
+.stream-stats .notifications::after {
+    content: attr(data-title);
+    position: absolute;
+    opacity: 0;
+    background-color: inherit;
+    padding: 0px 5px;
+    border-radius: 3px;
+    top: 130%;
+    width: max-content !important;
+    pointer-events: none;
+    transform: translateX(-60%);
+    z-index: 100;
+    transition: opacity .3s;
+    transition-delay: 0s;
+}
+.stream-stats .notifications::before {
+    content: '';
+    position: absolute;
+    opacity: 0;
+    width: 10px;
+    top: 110%;
+    left: 45%;
+    transform: rotateZ(45deg);
+    height: 10px;
+    background-color: inherit;
+    z-index: 50;
+    pointer-events: none;
+    transition: opacity .3s;
+    transition-delay: 0s;
+}
+.stream-stats .notifications:hover::before {
+    opacity: 1;
+    transition-delay: .6s;
+}
+.stream-stats .notifications:hover::after {
+    opacity: 1;
+    transition-delay: .6s;
+}
+
 .stream-stats .notifications.active {
     background-color: green;
 }
@@ -337,10 +455,19 @@ body {
 body[logged_in="true"] .streamCards-container[loading="false"] .no-content-container:only-child .no-content-text {
     opacity: 1 !important;
 }
-.streamCards-container[loading="true"] .twitch-loading-icon {
+body[logged_in="true"] .streamCards-container[loading="false"] .no-content-container:only-child .search-content-none {
+    opacity: 0 !important;   
+}
+.streamCards-container[loading="true"] .no-content-container:only-child .twitch-loading-icon {
     opacity: 1 !important;
 }
-.no-content-text {
+.no-content-container {
+    position: absolute;
+    width: 100%;
+    left: 50%;
+    transform: translate(-50%,180px);
+}
+.no-content-text, .search-content-none {
     opacity: 0;
     display: block;
     position: absolute;

@@ -6,7 +6,7 @@ var App = function(version) {
 	this.settings = {
 		liveStats:{
 			description:'Track the time at which streams are started and ended. Only works when you view the site',
-			value:false
+			value:true // always set true when testing
 		}
 	}
 
@@ -30,6 +30,7 @@ var App = function(version) {
 		displayUpdate:0,
 		cardsUpdate:0
 	};
+	this.events = $('<p></p>')[0];
 
 	return this;
 }
@@ -142,7 +143,7 @@ App.prototype.setToken = function(token) {
 			this.token.key = token;
 			this.token.expire_time = (new Date().getTime())+(data.expires_in*1000);
 			// Set scopes as true keys in token object
-			for (index in data.scopes) {this.token.scopes[data.scopes[index]] = true;}
+			for (var index in data.scopes) {this.token.scopes[data.scopes[index]] = true;}
 			this.version_update = false;
 			this.save();
 
@@ -235,28 +236,9 @@ App.prototype.checkLogin = function(init) {
 			return;
 		}
 
-		app.loadingAnimation(true).updateFollowedInfo();
-		//.updateStreams()
-
-		$('.login').addClass('connected');
-		$('body').attr('logged_in',true);
-
-		if (this.user) {
-			var name = this.user.display_name;
-			$('.login-user-contents').html(`Logged in as: ${name}`);
-
-			// If init is set then show success login alert (trigged by setUser)
-			if (init) {
-				bootbox.alert({
-					size:'small',
-					title:'Success',
-					message:`You have successfuly logged in as ${name}.`
-				});
-			}
-		}
-
-		if (!this.intervals.displayUpdate) {clearInterval(this.intervals.displayUpdate);}
-		this.intervals.displayUpdate = setInterval(this.updateStreams.bind(this),990);
+		var event = new CustomEvent('login',{detail:{user:this.user,init:init}});
+		this.events.dispatchEvent(event);
+		this.loadingAnimation(true).updateFollowedInfo();
 	}
 
 	return this;
@@ -267,6 +249,11 @@ App.prototype.updateStreams = function(forced) {
 	var then = this.streams.last_updated || 0;
 	var timeDiff = Math.floor((now-then)/1000);
 	var request;
+
+	if (!this.intervals.displayUpdate) {
+		clearInterval(this.intervals.displayUpdate);
+		this.intervals.displayUpdate = setInterval(this.updateStreams.bind(this),990);
+	}
 
 	$('.refresh').html('Next refresh: '+Math.min(this.streams.updateRate,Math.max((this.streams.updateRate-timeDiff),0)));
 
@@ -309,7 +296,6 @@ App.prototype.updateStreams = function(forced) {
 	    	var addedStreamNames = '';
 			
 			if (_removed.length) {
-		    	console.log('remove!',_removed)
 		    	for (var [index,item] of _removed.entries()) {
 		    		var lastIndex = (index+1)!=_removed.length;
 		    		removedStreamNames += (!lastIndex&&_removed.length!=1?'and ':'')+item.channel.display_name+(lastIndex&&_removed.length!=1?', ':'');
@@ -319,13 +305,19 @@ App.prototype.updateStreams = function(forced) {
 			    		item.remove(_app);
 			    	}
 		    	}
+		    	console.log('remove!',_removed);
 		    }
 		    if (_added.length) {
-		    	console.log('added!',_added);
 		    	for (var [index,item] of _added.entries()) {
-		    		var lastIndex = (index+1)!=_added.length;
-		    		addedStreamNames += (!lastIndex&&_added.length!=1?'and ':'')+item.channel.display_name+(lastIndex&&_added.length!=1?', ':'');
-		    	}
+		    		if (item.broadcast_platform=='live') { // Make sure if we are alerting for new streams they are live
+			    		var lastIndex = (index+1)!=_added.length;
+			    		addedStreamNames += (!lastIndex&&_added.length!=1?'and ':'')+item.channel.display_name+(lastIndex&&_added.length!=1?', ':'');
+			    	} else {
+			    		// If stream isn't live, then remove it from _added
+			    		_added.splice(index-1,1);
+			    	}
+			    }
+		    	console.log('added!',_added);
 		    }
 
 		    if ((_added.length || _removed.length)) {
@@ -340,7 +332,7 @@ App.prototype.updateStreams = function(forced) {
 					message:message,
 					backdrop:true
 				};
-				if (_added.length==1 || _removed.length==1) {bootboxAlert['size'] = 'small'}
+				if (_added.length<=1 && _removed.length<=1) {bootboxAlert['size'] = 'small'}
 			    bootbox.alert(bootboxAlert);
 			}
 		}
@@ -351,10 +343,9 @@ App.prototype.updateStreams = function(forced) {
 			var newStreams = data.streams;
 			var added = newStreams.filter(compare(oldStreams)); // Get how many objects are added
 		    var removed = oldStreams.filter(compare(newStreams)); // Get how many objects are removed
-			// var streamInfo;
 		    this.streams._constructs = this.streams._constructs || {};
 
-		    for (var _stream of data.streams) {
+		    for (var [index,_stream] of data.streams.entries()) {
 		    	var name = _stream.channel.display_name;
 		    	if (_stream.broadcast_platform == 'live') {
 			    	if (!this.streams._constructs[name]) {
@@ -378,7 +369,12 @@ App.prototype.updateStreams = function(forced) {
 						this.followedInfo[user].liveStats[name][_stream._id] = streamInfo;
 					}
 			    } else {
-			    	console.log('Not live stream ',_stream);
+			    	// Find any reruns and remove them from added
+			    	var _find = added.findIndex((x) => {return x.broadcast_platform == 'rerun'});
+			    	if (_find>-1) {added.splice(_find,1);}
+			    	var _g='color:lime;',_y='color:yellow',_w='color:default;';
+			    	data.streams.splice(index,1);
+			    	console.log(`Stream for%c ${_stream.channel.display_name} %cis not live and is rather a%c ${_stream.broadcast_platform} %cinstead.`,_g,_w,_y,_w,_stream);
 			    }
 			    
 		    }
@@ -397,11 +393,10 @@ App.prototype.updateStreams = function(forced) {
 	    	this.intervals.cardsUpdate = setInterval(() => {
 	    		for (var name in this.streams._constructs) {
 	    			var _stream = this.streams._constructs[name];
-	    			_stream.update('uptime',undefined,this).update('display',undefined,this);
+	    			_stream.update('uptime',undefined,this);
 	    		}
 	    	},1000);
 	    }
-	    // sortStreams();
 	}
 
 	return this;
@@ -444,7 +439,7 @@ App.prototype.updateFollowedInfo = function(forced) {
 				}
 
 				$.ajax(settings).then((data) => {
-					for (index in data.follows) {
+					for (var index in data.follows) {
 						var item = data.follows[index];
 						var created_at = item.created_at;
 						var notifications = item.notifications;
@@ -491,33 +486,68 @@ App.prototype.updateFollowedInfo = function(forced) {
 	return this;
 }
 
-
 App.prototype.loadingAnimation = function(state) {
 	$('.streamCards-container').attr('loading',state || false);
+
+	// Also update search
+	var searchAlert = $('.search-content-none');
+	searchAlert.html('');
+	searchAlert.css({'opacity':'0'});
 
 	return this;
 }
 
 App.prototype.error = function(err,_app) {
 	console.log('Error called',err);
-	var message = err.responseJSON.message;
-	var code = err.responseJSON.status;
+	var status = err.status;
 
-	if (code != 401) {
-		// If code is not 401, then just alert the error.
-		bootbox.alert(`There was an error requesting data from the API.<br>Error: ${message}<br>Code: ${status}`);
-		// clearInterval(_app.intervals.displayUpdate); // Stop timer from requesting from api
-	} else if (code == 401) {
-		// If code is 401, then oauth token is invalid and user needs to be logged out.
-		app.logout('Access token expire.');
-		// clearInterval(_app.intervals.displayUpdate); // Stop timer from requesting from api
-	}
+	if (err.responseJSON) {
+		var code = err.responseJSON.status;
+		var message = err.responseJSON.message;
 
-	// Clear intervals for all timers set in app.intervals
-	for (var timer in this.intervals) {
-		clearInterval(this.intervals[timer]);
-		this.intervals[timer] = 0;
+		if (code != 401) {
+			// If code is not 401, then just alert the error.
+			var _alert = $('.request-error_401');
+			if (_alert[0]) {_alert.find('.bootbox-accept').click();}
+			bootbox.alert({
+				message:`There was an error requesting data from the API.<br>Error: ${message}<br>Code: ${status}`,
+				title:'Error with request',
+				className:'request-error_401'
+			});
+			// clearInterval(_app.intervals.displayUpdate); // Stop timer from requesting from api
+		} else if (code == 401) {
+			// If code is 401, then oauth token is invalid and user needs to be logged out.
+			app.logout('Access token expire.');
+			clearInterval(_app.intervals.displayUpdate); // Stop timer from requesting from api
+		}
+
+		// Clear intervals for all timers set in app.intervals
+		for (var timer in this.intervals) {
+			clearInterval(this.intervals[timer]);
+			this.intervals[timer] = 0;
+		}
+	} else {
+		if (err.status == 0) {
+			var _alert = $('.request-error_0');
+			if (_alert[0]) {_alert.find('.bootbox-accept').click();}
+			bootbox.alert({
+				message:`Looks like you have no internet currently.<br>Status code: ${err.status}<br>Status Text: ${err.statusText}`,
+				title:'Error with request',
+				className:'request-error_0',
+				backdrop:true
+			});
+		} else {
+			var _alert = $('.request-error_unknown');
+			if (_alert[0]) {_alert.find('.bootbox-accept').click();}
+			bootbox.alert({
+				message:`There was an unknown error that happened getting data.<br>Status code: ${err.status}<br>Status Text: ${err.statusText}`,
+				title:'Error with request',
+				className:'request-error_unknown',
+				backdrop:true
+			});
+		}
 	}
+	this.loadingAnimation(false);
 
 	return this;
 }
