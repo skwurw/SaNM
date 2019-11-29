@@ -108,9 +108,10 @@ $(document).ready(() => {
 		$('body').attr('logged_in',false);
 		$('.login-user-contents').html('');
 	}).on('streams_update', () => {
-		console.log('streams_update');
-		var searchAlert = $('.search-streamCards');
-		searchAlert.change();
+		setTimeout(() => {
+			var searchAlert = $('.search-streamCards');
+			searchAlert.change();
+		},250);
 	});
 	// Load app after setting up UI login and event listener for logging in.
 	app.load().checkLogin();

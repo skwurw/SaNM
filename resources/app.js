@@ -391,7 +391,7 @@ App.prototype.updateStreams = function(forced) {
 		    // Sort stream elements
 		    sortStreams();
 			this.streams.streams = data.streams;
-			this.events.dispatchEvent(new CustomEvent('streams_update'));
+			if (!forced) {this.events.dispatchEvent(new CustomEvent('streams_update'));}
 
 			this.save().loadingAnimation(false);
 		}).fail((err) => {this.error(err,this)});
