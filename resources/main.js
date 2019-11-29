@@ -103,6 +103,10 @@ $(document).ready(() => {
 				});
 			}
 		}
+	}).on('logout', () => {
+		$('.login').removeClass('connected');
+		$('body').attr('logged_in',false);
+		$('.login-user-contents').html('');
 	});
 	// Load app after setting up UI login and event listener for logging in.
 	app.load().checkLogin();

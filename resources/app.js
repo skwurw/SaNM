@@ -187,12 +187,27 @@ App.prototype.logout = function(reason) {
 
 		// Revoke access token so it can't be used again.
 		$.ajax(settings).then(() => {
-			$('.login').removeClass('connected');
-			$('body').attr('logged_in',false);
-			$('.login-user-contents').html('');
+			this.events.dispatchEvent(new CustomEvent('logout'));
 		});
 
 	}
+
+	delete this.user;
+	delete this.token;
+	this.logged_in = false;
+	for (var stream in this.streams._constructs) {
+		this.streams._constructs[stream].remove(this);
+	}
+	this.streams = {
+		updateRate:40,
+		last_updated:-1,
+		streams:[],
+		_constructs:{}
+	};
+
+	localStorage.clear();
+	this.save();
+
 
 	bootbox.alert({
 		title:'Logged out',
@@ -206,19 +221,6 @@ App.prototype.logout = function(reason) {
 			location.reload();
 		}
 	});
-	
-	delete this.user;
-	delete this.token;
-	this.logged_in = false;
-	this.streams = {
-		updateRate:40,
-		last_updated:-1,
-		streams:[],
-		_constructs:{}
-	};
-
-	localStorage.clear();
-	this.save();
 
 	return this;
 }
