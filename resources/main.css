@@ -150,6 +150,7 @@ body {
     left: 50%;
     top: 0;
     transform: translateX(-50%);
+    /*z-index: 4;*/
 }
 
 
@@ -164,6 +165,7 @@ body {
     color: #c3c3c3;
     font-size: 18px;
     background-color: #00000000;
+    z-index: 1;
     transition: background-color .4s;
 }
 .cardHead-preview_loading::after {
@@ -174,8 +176,8 @@ body {
     transform: translate(-50%,-50%);
     width: 0%;
     height: 1%;
-    z-index: 9;
     animation: preview_loading 2s cubic-bezier(0.15, 0, 0.85, 1) infinite;
+    z-index: 1;
     background-color: #9d63f3;
 }
 .cardHead-preview_loading.cardHead-preview_loading_fail::before {

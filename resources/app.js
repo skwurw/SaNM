@@ -30,7 +30,7 @@ var App = function(version) {
 		displayUpdate:0,
 		cardsUpdate:0
 	};
-	this.events = $('<p></p>')[0];
+	this.events = document.createElement('p');
 
 	return this;
 }
@@ -257,7 +257,8 @@ App.prototype.updateStreams = function(forced) {
 		this.intervals.displayUpdate = setInterval(this.updateStreams.bind(this),990);
 	}
 
-	$('.refresh').html('Next refresh: '+Math.min(this.streams.updateRate,Math.max((this.streams.updateRate-timeDiff),0)));
+	var nextUpdate = Math.min(this.streams.updateRate,Math.max((this.streams.updateRate-timeDiff),0));
+	$('.refresh').html(`Next refresh: ${nextUpdate}<br>Streams live: ${this.streams.streams.length}`);
 
 	// Check if user is logged in and has a token, aswell making sure we do a request after a certain amount of time
 	if (this.logged_in && this.token.key && (timeDiff >= this.streams.updateRate || forced)) {
@@ -379,7 +380,7 @@ App.prototype.updateStreams = function(forced) {
 			    		removed.push(_stream);
 			    	}
 			    	var _g='color:lime;',_y='color:yellow',_w='color:default;';
-			    	// data.streams.splice(index,1);
+			    	data.streams.splice(index,1);
 			    	console.log(`Stream for%c ${_stream.channel.display_name} %cis not live and is rather a%c ${_stream.broadcast_platform} %cinstead.`,_g,_w,_y,_w,_stream);
 			    }
 			    
@@ -392,6 +393,8 @@ App.prototype.updateStreams = function(forced) {
 		    sortStreams();
 			this.streams.streams = data.streams;
 			if (!forced) {this.events.dispatchEvent(new CustomEvent('streams_update'));}
+
+			$('.refresh').html(`Next refresh: ${nextUpdate}<br>Streams live: ${this.streams.streams.length}`);
 
 			this.save().loadingAnimation(false);
 		}).fail((err) => {this.error(err,this)});

@@ -84,6 +84,7 @@ $(document).ready(() => {
 		}
 	});
 
+	var searchUpdate;
 	$(app.events).on('login', (event) => {
 		var details = event.detail, init = details.init;
 
@@ -108,7 +109,8 @@ $(document).ready(() => {
 		$('body').attr('logged_in',false);
 		$('.login-user-contents').html('');
 	}).on('streams_update', () => {
-		setTimeout(() => {
+		clearTimeout(searchUpdate);
+		searchUpdate = setTimeout(() => {
 			var searchAlert = $('.search-streamCards');
 			searchAlert.change();
 		},250);

@@ -57,7 +57,15 @@ var Stream = function(data,app) {
 	// For testing, removing the element
 	$(this.element).find('.cardBody-button-removetest').click(this.remove.bind(this,app));
 	// For testing, highlighting cards
-	$(this.element).find('.cardBody-button.button-highlight').click((el) => {$(this.element).toggleClass('highlight')});
+	$(this.element)
+		.find('.cardBody-button.button-highlight')
+		.click((el) => {$(this.element).toggleClass('highlight')})
+		.contextmenu((el) => {
+			var searchAlert = $('.search-streamCards'), name = this.info.name;
+			if (searchAlert.val() != name) {$(this.element).addClass('highlight');}
+			var _val = searchAlert.val()!=name?name:'';
+			searchAlert.val(_val).change();
+		});
 	
 	var logo = this.info.logo;
 	$(this.element).find('.cardBody-left_logoImage').attr('src',logo);
@@ -78,7 +86,7 @@ var Stream = function(data,app) {
 			.show();
 		// console.log(`Preview for ${this.info.name} loaded after ${loadTime}s`);
 	}).on('error',() => {
-		if (this.preview_timeout) {
+		if (this.preview_timeout != 0) {
 			clearTimeout(this.preview_timeout);
 			this.preview_timeout = 0;
 			this.previewTimeout();
@@ -88,7 +96,8 @@ var Stream = function(data,app) {
 	
 	$('.streamCards-container').append(this.element);
 }
-Stream.prototype.previewTimeout = function() {	
+Stream.prototype.previewTimeout = function() {
+	this.preview_timeout = 0;
 	var loadTime = (new Date().getTime()-this.stream_preview_load)/1000;
 	console.log(`%cPreview for ${this.info.name} failed after ${loadTime}s`,'color: #f33;');
 	$(this.element).find('.cardHead-stream_preview').attr('src','http://').hide().parent().addClass('cardHead-preview_loading_fail');
@@ -150,6 +159,7 @@ Stream.prototype.update = function(type,data,app) {
 		this.preview_timeout = setTimeout(() => {this.previewTimeout()},this.preview_loadtime*1000);
 		$(this.element).find('.cardHead-stream_preview')
 			.attr('src',preview.replace(/\s/g,''))
+			.hide()
 			.parent()
 			.addClass('cardHead-preview_loading')
 			.removeClass('cardHead-preview_loading_fail')
@@ -191,7 +201,7 @@ Stream.prototype.remove = function(app) {
 	delete app.streams._constructs[name];
 
 	var find = app.streams.streams.findIndex(x => {return x.channel.display_name == name});
-	if (find) {
+	if (find>=0) {
 		app.streams.streams.splice(find,1);
 	}
 	
