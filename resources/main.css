@@ -7,37 +7,35 @@ body {
 	--card-radious: 5px;
     cursor: default;
     user-select: none;
+    height: 100%;
+
+  
+    /*Stream card background colors*/
+    --twitch-loading-icon-fill: #7351a0;
+    --SC-background: #2e2e2e;
+    --SC-background-hover: #444;
+    --SC-body-dark-hover-highlight: #232323;
+    --SC-head-overlay-background: #000000a0;
+
+    /*Text colors*/
+    --no-content-gray: #bbb;
+    --color-twitch-purple: #9d63f3;
+    --SC-link-gray-color: #b4b4b4;
+    --SC-stream-stats-color: #eee;
+    --SC-head-loading-color: #c3c3c3;
+    --SC-body-gray-bold: #ccc;
+    --SC-body-gray-color: #9f9da8;
+    --SC-body-notifications-red: #bf1e1e;
+    --SC-body-notifications-green: green;
+
+    /*Highlight*/
+    --SC-highlight: #55bb41;
 
     overflow-x: hidden;
 }
-[type="streamcard-template"] {
-    display: none !important;
-}
-/* For refresh timer at top */
-.refresh {
-    color: White;
-    position: sticky;
-    width: fit-content;
-    top: 0;
-    left: .4%;
-    margin: 0px 2px;
-    z-index: 100;
-    background-color: #000000c0;
-    padding: 5px;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
-}
-.refresh:empty {
-    visibility: hidden;
-}
 
-.clock-svg {
-    fill: #00000000;
-    display: block;
-    float: left;
-    width: 15px;
-    height: 15px;
-    user-select: none;
+a:focus {
+    outline: none;
 }
 
 /* width */
@@ -61,8 +59,56 @@ body {
   background: #555; 
 }
 
+
+.main {
+    min-height: 92vh;
+    box-sizing: content-box;
+}
+
+footer {
+  position: relative;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  color: white;
+  text-align: center;
+}
+#space {
+    position: relative;
+    height: 20px;
+    pointer-events: none;
+}
+
+/* For refresh timer at top */
+.refresh {
+    color: white;
+    position: sticky;
+    width: fit-content;
+    top: 0;
+    left: .4%;
+    margin: 0px 2px;
+    z-index: 100;
+    background-color: var(--SC-head-overlay-background);
+    padding: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+.refresh:empty {
+    visibility: hidden;
+}
+
+.clock-svg {
+    fill: #00000000; /*Invisible*/
+    display: block;
+    float: left;
+    width: 15px;
+    height: 15px;
+    user-select: none;
+}
+
+
 .login {
-	color: White;
+	color: white;
 	position: absolute;
 	right: 5px;
 	top: 2px;
@@ -80,7 +126,7 @@ body {
 
 .login .login-button {
 	border: none;
-	background-color: #0000;
+	background-color: #0000; /*Invisible*/
 	padding: 0px;
 	margin: 0px;
 }
@@ -93,22 +139,29 @@ body {
 }
 
 
+[type="streamcard-template"] {
+    display: none !important;
+}
+
+/* Streamcard Highlight */
+.streamCard.highlight {
+    box-shadow: 0px 0px 10px 1px var(--SC-highlight);
+}
+.streamCard.highlight .button-highlight {
+    background-color: var(--SC-highlight);
+}
+
+/* Streamcards container and cards style */
 .streamCards-container {
     position: relative;
-    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     transition: width .6s;
 }
-.streamCard.highlight {
-    box-shadow: 0px 0px 10px 1px #55bb41;
-}
-.streamCard.highlight .button-highlight {
-    background-color: #55bb41;
-}
+
 .streamCard {
     width: var(--card-width) !important;
-	background-color: #2e2e2e;
+	background-color: var(--SC-background);
 	border-radius: 5px;
     height: var(--card-height);
     position: relative;
@@ -119,7 +172,7 @@ body {
 }
 
 .streamCard:hover {
-	background-color: #444;
+	background-color: var(--SC-background-hover);
 }
 
 .streamCard img {
@@ -136,7 +189,6 @@ body {
     height: 64.3%;
     position: relative;
     background-color: black;
-    border-radius-top: var(--card-radious);
     overflow: hidden;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
@@ -162,9 +214,9 @@ body {
     transform: translate(-50%,-50%);
     width: fit-content;
     height: fit-content;
-    color: #c3c3c3;
+    color: var(--SC-head-loading-color);
     font-size: 18px;
-    background-color: #00000000;
+    background-color: #00000000; /*Invisible*/
     z-index: 1;
     transition: background-color .4s;
 }
@@ -178,7 +230,7 @@ body {
     height: 1%;
     animation: preview_loading 2s cubic-bezier(0.15, 0, 0.85, 1) infinite;
     z-index: 1;
-    background-color: #9d63f3;
+    background-color: var(--color-Twitch-Purple);
 }
 .cardHead-preview_loading.cardHead-preview_loading_fail::before {
     content: 'Preview failed to load';
@@ -188,7 +240,7 @@ body {
     width: 51%;
 }
 .cardHead-preview_loading.cardHead-preview_loading_fail:hover::before {
-    background-color: #ff000030;
+    background-color: #ff000030; /*Seethrough red color*/
 }
 .cardHead-preview_loading.cardHead-preview_loading_fail::after {
     background-color: red !important;
@@ -228,14 +280,14 @@ body {
 }
 /* Stats display */
 .cardHead-overlay .stream-stats {
-    color: #eee;
+    color: var(--SC-stream-stats-color);
     opacity: 0;
     pointer-events: all;
     user-select: text;
     position: absolute;
     height: 18px;
     margin: 8px 10px;
-    background-color: #000000a0;
+    background-color: var(--SC-head-overlay-background);
     padding: 1px 5px;
     border-radius: var(--card-radious);
     transition: all .3s;
@@ -268,14 +320,14 @@ body {
 }
 /* Uptime display*/
 .cardHead-overlay_uptime {
-	color: #eee;
+	color: var(--SC-stream-stats-color);
 	pointer-events: all;
 	user-select: text;
     position: absolute;
     height: 18px;
     right: 0;
     margin: 8px 10px;
-    background-color: #00000080;
+    background-color: var(--SC-head-overlay-background);
     padding: 1px 5px;
     border-radius: var(--card-radious);
 }
@@ -285,7 +337,7 @@ body {
 }
 /* Viewers display */
 .cardHead-overlay_viewers {
-	color: #eee;
+	color: var(--SC-stream-stats-color);
 	pointer-events: all;
 	user-select: text;
     position: absolute;
@@ -340,7 +392,7 @@ body {
 .cardBody-rt {
     font-size: 13px;
     font-weight: 1000;
-	color: #ccc;
+	color: var(--SC-body-gray-bold);
 }
 .cardBody-rt::after {
     display: inline-block;
@@ -361,8 +413,8 @@ body {
 }
 .cardBody-rt:hover::after {
     opacity: 1;
-    background-color: #232323;
-    color: #9d63f3 !important;
+    background-color: var(--SC-body-dark-hover-highlight);
+    color: var(--color-twitch-purple) !important;
 }
 .cardBody-rt, .cardBody-rd, .cardBody-rn {
     width: fit-content;
@@ -372,19 +424,19 @@ body {
     text-overflow: ellipsis;
 }
 .cardBody-rn {
-    color: #9f9da8;
+    color: var(--SC-body-gray-color);
 }
 .cardBody-rd {
-    color: #9f9da8;
+    color: var(--SC-body-gray-color);
 }
 .cardBody-link, .cardBody-link:focus {
-	color: #b4b4b4;
+	color: var(--SC-link-gray-color);
 	text-decoration: none;
 	transition: color .2s;
 }
 .cardBody-link:hover, .cardBody-link:focus {
 	text-decoration: none;
-	color: #9d63f3 !important;
+	color: var(--color-twitch-purple) !important;
 }
 
 
@@ -404,7 +456,7 @@ body {
     left: 4%;
     padding: 1px 3px;
     margin: 2px 1px;
-    background-color: #bf1e1e;
+    background-color: var(--SC-body-notifications-red);
     border-radius: 3px;
     color: white;
 }
@@ -448,10 +500,10 @@ body {
 }
 
 .stream-stats .notifications.active {
-    background-color: green;
+    background-color: var(--SC-body-notifications-green);
 }
 .cardBody-bottom .follow-age {
-    color: #9f9da8;
+    color: var(--SC-body-gray-color);
 }
 .cardBody-button {
 	margin: 0px 5px;
@@ -480,7 +532,7 @@ body[logged_in="true"] .streamCards-container[loading="false"] .no-content-conta
     position: absolute;
     left: 50%;
     top: 30%;
-    color: #bbb;
+    color: var(--no-content-gray);
     font-size: 18px;
     font-style: italic;
     transform: translatex(-50%);
@@ -510,7 +562,7 @@ body[logged_in="true"] .streamCards-container[loading="false"] .no-content-conta
     animation: loading-content 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
 }
 .twitch-loading-icon svg {
-    fill: #7351a0;
+    fill: var(--twitch-loading-icon-fill);
     position: absolute;
     top: 30%;
     left: 50%;

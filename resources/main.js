@@ -90,7 +90,7 @@ $(document).ready(() => {
 
 		$('.login').addClass('connected');
 		$('body').attr('logged_in',true);
-
+		
 		if (details.user) {
 			var name = details.user.display_name;
 			$('.login-user-contents div').html(`Logged in as: ${name}`);
