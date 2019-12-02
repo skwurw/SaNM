@@ -62,7 +62,7 @@ var Stream = function(data,app) {
 		.click((el) => {$(this.element).toggleClass('highlight')})
 		.contextmenu((el) => {
 			var searchAlert = $('.search-streamCards'), name = this.info.name;
-			if (searchAlert.val() != name) {$(this.element).addClass('highlight');}
+			if (searchAlert.val().toLowerCase() != name.toLowerCase()) {$(this.element).addClass('highlight');}
 			var _val = searchAlert.val()!=name?name:'';
 			searchAlert.val(_val).change();
 		});
@@ -100,7 +100,12 @@ Stream.prototype.previewTimeout = function() {
 	this.preview_timeout = 0;
 	var loadTime = (new Date().getTime()-this.stream_preview_load)/1000;
 	console.log(`%cPreview for ${this.info.name} failed after ${loadTime}s`,'color: #f33;');
-	$(this.element).find('.cardHead-stream_preview').attr('src','http://').hide().parent().addClass('cardHead-preview_loading_fail');
+	$(this.element).find('.cardHead-stream_preview')
+		.attr('src','http://')
+		.hide()
+		.parent()
+		.addClass('cardHead-preview_loading_fail')
+		.attr('data-loading',`Preview failed to load (${Math.floor(loadTime*100)/100}s)`);
 }
 
 //Update info about the constructor like uptime.
@@ -162,6 +167,7 @@ Stream.prototype.update = function(type,data,app) {
 			.hide()
 			.parent()
 			.addClass('cardHead-preview_loading')
+			.attr('data-loading','Loading preview...')
 			.removeClass('cardHead-preview_loading_fail')
 			.attr('href',`https://www.twitch.tv/${channel}`);
 

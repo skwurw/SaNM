@@ -1,5 +1,4 @@
 body {
-    background-color: #222 !important;
     font-family: Arial;
 	font-size: 12px;
     --card-width: 350px;
@@ -9,32 +8,58 @@ body {
     user-select: none;
     height: 100%;
 
-  
-    /*Stream card background colors*/
-    --twitch-loading-icon-fill: #7351a0;
-    --SC-background: #2e2e2e;
-    --SC-background-hover: #444;
-    --SC-body-dark-hover-highlight: #232323;
-    --SC-head-overlay-background: #000000a0;
+    /* Default background colors */
+    --SC-background: #d2d2d2;
+    --SC-background-hover: #a7a7a7;
+    --SC-body-hover-highlight: #353535;
 
-    /*Text colors*/
-    --no-content-gray: #bbb;
-    --color-twitch-purple: #9d63f3;
-    --SC-link-gray-color: #b4b4b4;
-    --SC-stream-stats-color: #eee;
-    --SC-head-loading-color: #c3c3c3;
-    --SC-body-gray-bold: #ccc;
-    --SC-body-gray-color: #9f9da8;
-    --SC-body-notifications-red: #bf1e1e;
-    --SC-body-notifications-green: green;
+    /* Default text Colors */
+    --login-color: black;
+    --no-content-gray: #404040;
+    --SC-body-gray-bold: black;
+    --SC-link-gray-color: black;
+    --SC-body-gray-color: black;
 
     /*Highlight*/
-    --SC-highlight: #55bb41;
+    --SC-highlight: #3d822f;
+
+
+    /* Lightmode colors - Backgrounds */
+    --twitch-loading-icon-fill: #7351a0;
+    --SC-head-overlay-background: #000000a0;
+    
+    /* Lightmode colors - Text Colors*/
+    --color-twitch-purple: #9d63f3;
+    --loading-text-color: black;
+    --SC-body-notifications-red: #bf1e1e;
+    --SC-body-notifications-green: green;
+    --SC-head-loading-color: #c3c3c3;
+    --SC-stream-stats-color: #eee;
 
     overflow-x: hidden;
 }
 
-a:focus {
+.darkmode {
+    background-color: #222 !important;
+
+    /*Stream card background colors*/
+    --SC-background: #2e2e2e;
+    --SC-background-hover: #444;
+    --SC-body-hover-highlight: #232323;
+
+    /*Text colors*/
+    --login-color: white;
+    --loading-text-color: white;
+    --no-content-gray: #bbb;
+    --SC-body-gray-bold: #ccc;
+    --SC-link-gray-color: #b4b4b4;
+    --SC-body-gray-color: #9f9da8;
+
+    /*Highlight*/
+    --SC-highlight: #55bb41;
+}
+
+a:focus, button:focus {
     outline: none;
 }
 
@@ -108,7 +133,7 @@ footer {
 
 
 .login {
-	color: white;
+	color: var(--login-color);
 	position: absolute;
 	right: 5px;
 	top: 2px;
@@ -207,7 +232,7 @@ footer {
 
 
 .cardHead-preview_loading::before {
-    content: 'Loading preview...';
+    content: attr(data-loading);
     position: absolute;
     left: 50%;
     top: 50%;
@@ -221,31 +246,35 @@ footer {
     transition: background-color .4s;
 }
 .cardHead-preview_loading::after {
-    content: '';
+    content: attr(data-loading);
     position: absolute;
     left: 75%;
     top: 57%;
     transform: translate(-50%,-50%);
-    width: 0%;
+    width: fit-content;
     height: 1%;
+    color: #00000000;
+    font-size: 18px;
     animation: preview_loading 2s cubic-bezier(0.15, 0, 0.85, 1) infinite;
     z-index: 1;
-    background-color: var(--color-Twitch-Purple);
+    background-color: var(--color-twitch-purple);
 }
 .cardHead-preview_loading.cardHead-preview_loading_fail::before {
-    content: 'Preview failed to load';
+    content: attr(data-loading);
     text-align: center;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
-    width: 51%;
+    width: fit-content;
 }
 .cardHead-preview_loading.cardHead-preview_loading_fail:hover::before {
     background-color: #ff000030; /*Seethrough red color*/
 }
 .cardHead-preview_loading.cardHead-preview_loading_fail::after {
     background-color: red !important;
+    box-shadow: 0px 1px 4px 1px red;
     animation: none;
-    width: 51%;
+    width: fit-content;
+    padding: 0px 5px;
     left: 50%;
 }
 
@@ -365,7 +394,7 @@ footer {
 	padding: 3px;
 }
 .cardBody-top {
-	height: 54%;
+	height: 50%;
 }
 .cardBody-left {
     float: left;
@@ -413,7 +442,7 @@ footer {
 }
 .cardBody-rt:hover::after {
     opacity: 1;
-    background-color: var(--SC-body-dark-hover-highlight);
+    background-color: var(--SC-body-hover-highlight);
     color: var(--color-twitch-purple) !important;
 }
 .cardBody-rt, .cardBody-rd, .cardBody-rn {
@@ -442,7 +471,7 @@ footer {
 
 .cardBody-bottom {
 	position: relative;
-	height: 45%;
+	height: 50%;
     margin-top: 1%;
     padding: 0px 5px 0px 5px;
 }
@@ -558,6 +587,7 @@ body[logged_in="true"] .streamCards-container[loading="false"] .no-content-conta
     float: left;
     top: 80%;
     left: 50%;
+    color: var(--loading-text-color);
     transform: translatex(-50%);
     animation: loading-content 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
 }

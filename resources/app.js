@@ -7,6 +7,10 @@ var App = function(version) {
 		liveStats:{
 			description:'Track the time at which streams are started and ended. Only works when you view the site',
 			value:true // always set true when testing
+		},
+		darkmode:{
+			description:'Enable the darkmode for the webpage. Default is true',
+			value:true
 		}
 	}
 
@@ -52,8 +56,10 @@ App.prototype.load = function() {
 		};
 		// Loop through settings to update descriptions, only update value if its not provided
 		for (var setting in this.settings) {
+			var savedSetting = (appData.settings?appData.settings[setting]:undefined);
+			console.log(savedSetting,appData.settings);
 			this.settings[setting].description = this.settings[setting].description;
-			this.settings[setting].value = (appData.settings?appData.settings[setting].value || this.settings[setting].value:this.settings[setting].value);
+			this.settings[setting].value = (savedSetting?appData.settings[setting].value:this.settings[setting].value);
 		}
 		this.logged_in = appData.logged_in || this.logged_in;
 		this.user = appData.user || this.user;
@@ -81,6 +87,7 @@ App.prototype.load = function() {
 			this.version = this.version;
 		}
 
+		this.events.dispatchEvent(new CustomEvent('app-load'));
 		this.save();
 	} else {
 		// If no app info is stored localy, then just wipe local storage
@@ -252,10 +259,7 @@ App.prototype.updateStreams = function(forced) {
 	var timeDiff = Math.floor((now-then)/1000);
 	var request;
 
-	if (!this.intervals.displayUpdate) {
-		clearInterval(this.intervals.displayUpdate);
-		this.intervals.displayUpdate = setInterval(this.updateStreams.bind(this),990);
-	}
+	this.startDisplay();
 
 	var nextUpdate = Math.min(this.streams.updateRate,Math.max((this.streams.updateRate-timeDiff),0));
 	$('.refresh').html(`Next refresh: ${nextUpdate}<br>Streams live: ${this.streams.streams.length}`);
@@ -380,7 +384,6 @@ App.prototype.updateStreams = function(forced) {
 			    		removed.push(_stream);
 			    	}
 			    	var _g='color:lime;',_y='color:yellow',_w='color:default;';
-			    	data.streams.splice(index,1);
 			    	console.log(`Stream for%c ${_stream.channel.display_name} %cis not live and is rather a%c ${_stream.broadcast_platform} %cinstead.`,_g,_w,_y,_w,_stream);
 			    }
 			    
@@ -494,6 +497,20 @@ App.prototype.updateFollowedInfo = function(forced) {
 	}
 
 	return this;
+}
+
+// Toggle display updates for testing
+App.prototype.startDisplay = function() {
+	if (!this.intervals.displayUpdate) {
+		clearInterval(this.intervals.displayUpdate);
+		this.intervals.displayUpdate = setInterval(this.updateStreams.bind(this),990);
+	}
+}
+App.prototype.stopDisplay = function() {
+	if (this.intervals.displayUpdate) {
+		clearInterval(this.intervals.displayUpdate);
+		this.intervals.displayUpdate = 0;
+	}
 }
 
 App.prototype.loadingAnimation = function(state) {

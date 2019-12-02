@@ -85,11 +85,16 @@ $(document).ready(() => {
 	});
 
 	var searchUpdate;
-	$(app.events).on('login', (event) => {
+	$(app.events).on('app-load', () => {
+		if (!app.settings.darkmode.value) {
+			$('body').removeClass('darkmode');
+		}
+	}).on('login', (event) => {
 		var details = event.detail, init = details.init;
 
 		$('.login').addClass('connected');
 		$('body').attr('logged_in',true);
+
 		
 		if (details.user) {
 			var name = details.user.display_name;
@@ -110,10 +115,12 @@ $(document).ready(() => {
 		$('.login-user-contents').html('');
 	}).on('streams_update', () => {
 		clearTimeout(searchUpdate);
-		searchUpdate = setTimeout(() => {
-			var searchAlert = $('.search-streamCards');
-			searchAlert.change();
-		},250);
+		var searchAlert = $('.search-streamCards');
+		if (searchAlert.val()!='') {
+			searchUpdate = setTimeout(() => {
+				searchAlert.change();
+			},250);
+		}
 	});
 	// Load app after setting up UI login and event listener for logging in.
 	app.load().checkLogin();

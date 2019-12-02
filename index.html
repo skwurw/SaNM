@@ -10,11 +10,12 @@
 		<meta name="msapplication-navbutton-color" content="#222">
 		<meta name="apple-mobile-web-app-status-bar-style" content="#222">
 
+		<link rel="icon" type="image/png" href="resources/favicon.png">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></link>
 		<link rel="stylesheet" type="text/css" href="resources/main.css">
 		<link rel="manifest" href="resources/manifest.json">
 	</head>
-	<body logged_in="false">
+	<body logged_in="false" class="darkmode">
 		<div class='refresh'></div>
 		<div class='login'>
 			<button class='login-button' title='Connect with twitch' tabindex="-1">
@@ -31,7 +32,7 @@
 		<div class="main">
 			<div class='streamCard' data-user="" type='streamcard-template'>
 				<div class='cardHead'>
-					<a href="" class="cardHead-preview_link" target="_blank" rel="noopener" tabindex="-1">
+					<a href="" class="cardHead-preview_link" data-loading="" target="_blank" rel="noopener" tabindex="-1">
 						<image class="cardHead-stream_preview" src="" alt="stream_preview"/>
 					</a>
 					<div class='cardHead-overlay'>
@@ -89,7 +90,7 @@
 						<div class='cardBody-right'>
 							<div class='cardBody-right_text'>
 								<div class='cardBody-rt'>
-									Title regergioergi jergj eriogjei 12345678tegerg
+									Some Title
 								</div>
 								<div class='cardBody-rn'>
 									Name
