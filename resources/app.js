@@ -22,7 +22,11 @@ var App = function(version) {
 		updateRate:40,
 		last_updated:-1,
 		streams:[],
-		_constructs:{}
+		_constructs:{},
+		alert:{
+			added:[],
+			removed:[]
+		}
 	};
 	this.followedInfo = {}
 	this.token = {
@@ -52,12 +56,15 @@ App.prototype.load = function() {
 			updateRate:this.streams.updateRate,
 			last_updated:(appData.streams.last_updated || this.streams.last_updated),
 			streams:(appData.streams?(!appData.streams.streams.length?this.streams.streams:appData.streams.streams):this.streams.streams),
-			_constructs:this.streams._constructs
+			_constructs:this.streams._constructs,
+			alert:{
+				added:(appData.streams.alert?appData.streams.alert.added:this.streams.alert.added),
+				removed:(appData.streams.alert?appData.streams.alert.removed:this.streams.alert.removed)
+			}
 		};
 		// Loop through settings to update descriptions, only update value if its not provided
 		for (var setting in this.settings) {
 			var savedSetting = (appData.settings?appData.settings[setting]:undefined);
-			console.log(savedSetting,appData.settings);
 			this.settings[setting].description = this.settings[setting].description;
 			this.settings[setting].value = (savedSetting?appData.settings[setting].value:this.settings[setting].value);
 		}
@@ -253,6 +260,97 @@ App.prototype.checkLogin = function(init) {
 	return this;
 }
 
+App.prototype.alertChanges = function(_app,_removed,_added,forced) {
+	if ((_removed.length==0 && _added.length==0) && !forced) {
+		// If there are no changes to added/removed then don't do anything
+		console.log('Skipping cause no changes.',_added,_removed);
+		return;
+	}
+	var removedStreamNames = '', addedStreamNames = '';
+
+	if (_removed.length) {
+    	for (item of _removed) {
+    		var find = _app.streams.alert.removed.findIndex(e => {return e.channel.display_name == item.channel.display_name});
+    		if (find==-1) {
+	    		_app.streams.alert.removed.push(item);
+	    	} else {
+	    		console.log(`Ignoring ${item.channel.display_name}`);
+	    	}
+    	}
+    }
+    if (_added.length) {
+    	for (item of _added) {
+    		var find = _app.streams.alert.added.findIndex(e => {return e.channel.display_name == item.channel.display_name});
+    		if (find==-1) {
+	    		_app.streams.alert.added.push(item);
+	    	} else {
+	    		console.log(`Ignoring ${item.channel.display_name}`);
+	    	}
+	    }
+    }
+	
+	if (_app.streams.alert.removed.length) {
+    	for (var [index,item] of _app.streams.alert.removed.entries()) {
+    		var len = _app.streams.alert.removed.length;
+    		var lastIndex = (index+1)!=len;
+    		removedStreamNames += (!lastIndex&&len!=1?'and ':'')+item.channel.display_name+(lastIndex&&len!=1?', ':'');
+    		
+    		var item = _app.streams._constructs[item.channel.display_name];
+    		if (item) {
+	    		item.remove(_app);
+	    	}
+    	}
+    	console.log('removed!',_app.streams.alert.removed);
+    }
+    if (_app.streams.alert.added.length) {
+    	for (var [index,item] of _app.streams.alert.added.entries()) {
+    		if (item.broadcast_platform=='live') { // Make sure if we are alerting for new streams that are live
+    			var len = _app.streams.alert.added.length;
+	    		var lastIndex = (index+1)!=len;
+	    		addedStreamNames += (!lastIndex&&len!=1?'and ':'')+item.channel.display_name+(lastIndex&&len!=1?', ':'');
+	    	} else {
+	    		// If stream isn't live, then remove it from _added
+	    		_app.streams.alert.added.splice(index-1,1);
+	    	}
+	    }
+    	console.log('added!',_app.streams.alert.added);
+    }
+
+    if ((_app.streams.alert.added.length || _app.streams.alert.removed.length)) {
+    	var message = '';
+    	message += addedStreamNames?`Streams added: ${_app.streams.alert.added.length}<br><b>${addedStreamNames}</b>`:'';
+    	message += (addedStreamNames&&removedStreamNames?'<br><br>':'');
+    	message += removedStreamNames?`Streams removed: ${_app.streams.alert.removed.length}<br><b>${removedStreamNames}</b>`:'';
+    	// console.log(message);
+
+    	var bootboxAlert = {
+			title:'Changes to streams',
+			message:message,
+			backdrop:true,
+			className:'streams-change-alert',
+			buttons:{
+				confirm:{
+					label:'Close',
+				}
+			},
+			callback:(e) => {
+				if (!e){return;}
+				// If user clicks the close button, then clear saved alerts
+				console.log('Clearing alerts.');
+				_app.streams.alert = {added:[],removed:[]};
+				_app.save();
+			}
+		};
+		if (_app.streams.alert.added.length<=1 && _app.streams.alert.removed.length<=1) {bootboxAlert['size'] = 'small'}
+		
+		if (_added.length || _removed.length || forced) {
+			// Only display alert if there are changes or if it was forced
+			$('.streams-change-alert').click(); // Remove current alert to update it
+		    bootbox.confirm(bootboxAlert);
+		}
+	}
+}
+
 App.prototype.updateStreams = function(forced) {
 	var now = new Date().getTime();
 	var then = this.streams.last_updated || 0;
@@ -298,51 +396,6 @@ App.prototype.updateStreams = function(forced) {
 				return b.dataset.viewers - a.dataset.viewers;
 			}).appendTo($parent);
 		}
-		var alertChanges = function(_app,_removed,_added,forced) {
-	    	var removedStreamNames = '';
-	    	var addedStreamNames = '';
-			
-			if (_removed.length) {
-		    	for (var [index,item] of _removed.entries()) {
-		    		var lastIndex = (index+1)!=_removed.length;
-		    		removedStreamNames += (!lastIndex&&_removed.length!=1?'and ':'')+item.channel.display_name+(lastIndex&&_removed.length!=1?', ':'');
-		    		
-		    		var item = _app.streams._constructs[item.channel.display_name];
-		    		if (item) {
-			    		item.remove(_app);
-			    	}
-		    	}
-		    	console.log('remove!',_removed);
-		    }
-		    if (_added.length) {
-		    	for (var [index,item] of _added.entries()) {
-		    		if (item.broadcast_platform=='live') { // Make sure if we are alerting for new streams that are live
-			    		var lastIndex = (index+1)!=_added.length;
-			    		addedStreamNames += (!lastIndex&&_added.length!=1?'and ':'')+item.channel.display_name+(lastIndex&&_added.length!=1?', ':'');
-			    	} else {
-			    		// If stream isn't live, then remove it from _added
-			    		_added.splice(index-1,1);
-			    	}
-			    }
-		    	console.log('added!',_added);
-		    }
-
-		    if ((_added.length || _removed.length)) {
-		    	var message = '';
-		    	message += addedStreamNames?`Streams added: ${_added.length}<br><b>${addedStreamNames}</b>`:'';
-		    	message += (addedStreamNames&&removedStreamNames?'<br><br>':'');
-		    	message += removedStreamNames?`Streams removed: ${_removed.length}<br><b>${removedStreamNames}</b>`:'';
-		    	// console.log(message);
-
-		    	var bootboxAlert = {
-					title:'Changes to streams',
-					message:message,
-					backdrop:true
-				};
-				if (_added.length<=1 && _removed.length<=1) {bootboxAlert['size'] = 'small'}
-			    bootbox.alert(bootboxAlert);
-			}
-		}
 
 		$.ajax(settings).then((data) => {
 			var user = this.user._id;
@@ -386,12 +439,11 @@ App.prototype.updateStreams = function(forced) {
 			    	var _g='color:lime;',_y='color:yellow',_w='color:default;';
 			    	console.log(`Stream for%c ${_stream.channel.display_name} %cis not live and is rather a%c ${_stream.broadcast_platform} %cinstead.`,_g,_w,_y,_w,_stream);
 			    }
-			    
 		    }
 
 
 		    // Alert for added/remove streams
-		    alertChanges(this,removed,added,forced);
+		    this.alertChanges(this,removed,added,forced);
 		    // Sort stream elements
 		    sortStreams();
 			this.streams.streams = data.streams;

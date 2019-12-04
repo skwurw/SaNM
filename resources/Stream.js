@@ -75,7 +75,7 @@ var Stream = function(data,app) {
 	this.stream_preview_load = new Date().getTime();
 	this.preview_loadtime = 8; // How long before we cancel loading the preview
 	this.preview_timeout = setTimeout(() => {this.previewTimeout()},this.preview_loadtime*1000);
-	$(this.element).find('.cardHead-stream_preview').on('load',(element) => {
+	$(this.element).find('.cardHead-stream_preview').on('load',(event) => {
 		var loadTime = (new Date().getTime()-this.stream_preview_load)/1000;
 		clearTimeout(this.preview_timeout);
 		$(this.element)
@@ -84,6 +84,7 @@ var Stream = function(data,app) {
 			.toggleClass()
 			.find('.cardHead-stream_preview')
 			.show();
+
 		// console.log(`Preview for ${this.info.name} loaded after ${loadTime}s`);
 	}).on('error',() => {
 		if (this.preview_timeout != 0) {
@@ -172,7 +173,7 @@ Stream.prototype.update = function(type,data,app) {
 			.attr('href',`https://www.twitch.tv/${channel}`);
 
 		// Card Head
-		$(this.element).find('.cardHead-overlay_uptime').attr('title',`Started at: ${startTime}`);
+		$(this.element).find('.cardHead-overlay_uptime').attr('title',`Started at:\n${startTime}`);
 		$(this.element).find('.cardHead-overlay_viewers span').html(this.info.viewers.toLocaleString());
 		// }
 	} else if (type == 'data') {
@@ -202,6 +203,7 @@ Stream.prototype.updateNotifications = function(state) {
 }
 
 Stream.prototype.remove = function(app) {
+	if (!app) {throw new Error('App not passed to Stream.remove')};
 	var name = this.info.name;
 	$(this.element).remove();
 	delete app.streams._constructs[name];
