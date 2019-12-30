@@ -1,24 +1,160 @@
 body {
-    background-color: #2c2c2c !important;
     font-family: Arial;
 	font-size: 12px;
-    --card-width: 320px;
+    --card-width: 350px;
+    --card-height: 305px;
 	--card-radious: 5px;
     cursor: default;
     user-select: none;
+    height: 100%;
+
+    background-color: #bbb;
+
+    /* Default background colors */
+    --SC-background: #d2d2d2;
+    --SC-background-hover: #f1f1f1;
+    --SC-body-hover-highlight: #353535;
+
+    /* Default text Colors */
+    --login-color: black;
+    --no-content-gray: #404040;
+    --SC-body-gray-bold: black;
+    --SC-link-gray-color: black;
+    --SC-body-gray-color: black;
+
+    /*Highlight*/
+    --SC-highlight: #3d822f;
+
+
+    /* Lightmode colors - Backgrounds */
+    --twitch-loading-icon-fill: #7351a0;
+    --SC-head-overlay-background: #000000a0;
+    --SC-body-hover-highlight: #484848;
+    
+    /* Lightmode colors - Text Colors*/
+    --color-twitch-purple: #9d63f3;
+    --loading-text-color: black;
+    --SC-body-notifications-red: #bf1e1e;
+    --SC-body-notifications-green: green;
+    --SC-head-loading-color: #c3c3c3;
+    --SC-stream-stats-color: #eee;
+
+    overflow-x: hidden;
 }
+
+.darkmode {
+    background-color: #222 !important;
+
+    /*Stream card background colors*/
+    --SC-background: #2e2e2e;
+    --SC-background-hover: #444;
+    --SC-body-hover-highlight: #232323;
+
+    /*Text colors*/
+    --login-color: white;
+    --loading-text-color: white;
+    --no-content-gray: #bbb;
+    --SC-body-gray-bold: #ccc;
+    --SC-link-gray-color: #b4b4b4;
+    --SC-body-gray-color: #9f9da8;
+
+    /*Highlight*/
+    --SC-highlight: #55bb41;
+}
+
+a:focus, button:focus {
+    outline: none;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f11c; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #676666;
+  border-radius: 3px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
+.nav {
+    width: 100%;
+    height: 50px;
+    top: 0px;
+    position: fixed;
+    z-index: 20;
+    background-color: red;
+    transition: all .1s;
+}
+.nav.collaps {
+    height: 30px;
+    background-color: #ff0000c0;
+    transition: all .3s;
+}
+
+.main {
+    /*top: 70px;*/
+    top: 18px;
+    position: relative;
+    /*min-height: 88vh;*/
+    min-height: 93vh;
+    box-sizing: content-box;
+}
+
+footer {
+  position: relative;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  color: white;
+  text-align: center;
+}
+#space {
+    position: relative;
+    height: 20px;
+    pointer-events: none;
+}
+
 /* For refresh timer at top */
 .refresh {
-	color: White;
-	position: relative;
-	width: fit-content;
-	left: 0%;
-	margin: 10px 2px;
+    color: white;
+    position: sticky;
+    width: fit-content;
+    top: 0;
+    left: .4%;
+    margin: 0px 2px;
+    z-index: 100;
+    background-color: var(--SC-head-overlay-background);
+    padding: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+.refresh:empty {
+    visibility: hidden;
+}
+
+.clock-svg {
+    fill: #00000000; /*Invisible*/
+    display: block;
+    float: left;
+    width: 15px;
+    height: 15px;
+    user-select: none;
 }
 
 
 .login {
-	color: White;
+	color: var(--login-color);
 	position: absolute;
 	right: 5px;
 	top: 2px;
@@ -34,31 +170,59 @@ body {
 	display: none;
 }
 
+.login-user-contents label {
+    font-weight: initial;
+}
+
 .login .login-button {
 	border: none;
-	background-color: #0000;
+	background-color: #0000; /*Invisible*/
 	padding: 0px;
 	margin: 0px;
 }
 .login .login-button:focus {
 	outline: none;
 }
+.login .search-streamCards {
+    color: Black;
+    width: 100%;
+}
 
 
+[type="streamcard-template"] {
+    display: none !important;
+}
+
+/* Streamcard Highlight */
+.streamCard.highlight {
+    box-shadow: 0px 0px 10px 1px var(--SC-highlight);
+}
+.streamCard.highlight .button-highlight {
+    background-color: var(--SC-highlight);
+}
+
+/* Streamcards container and cards style */
+.streamCards-container {
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: width .6s;
+}
 
 .streamCard {
-    width: 320px !important;
-	background-color: #333;
+    width: var(--card-width) !important;
+	background-color: var(--SC-background);
 	border-radius: 5px;
-    height: 268px;
+    height: var(--card-height);
     position: relative;
 	display: none;
 	margin: 5px 10px;
-	transition: background-color .5s;
+    box-shadow: none;
+	transition: background-color .5s, box-shadow .5s;
 }
 
 .streamCard:hover {
-	background-color: #444;
+	background-color: var(--SC-background-hover);
 }
 
 .streamCard img {
@@ -71,49 +235,176 @@ body {
 
 /* Start of cardHead */
 .cardHead {
-    width: var(--card-width);
-    height: 180px;
+    width: 100%;
+    height: 64.3%;
     position: relative;
+    background-color: black;
+    overflow: hidden;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+
+    background-image: url('/resources/bg_glitch_pattern.png');
+    background-repeat: repeat-x;
+    background-position: 23px 0px;
 }
 .cardHead-stream_preview {
     position:absolute;
-    left: 0;
+    left: 50%;
     top: 0;
-    border-radius: var(--card-radious);
+    transform: translateX(-50%);
+    /*z-index: 4;*/
 }
+
+
+.cardHead-preview_loading::before {
+    content: attr(data-loading);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    width: fit-content;
+    height: fit-content;
+    color: var(--SC-head-loading-color);
+    font-size: 18px;
+    background-color: #00000000; /*Invisible*/
+    z-index: 1;
+    transition: background-color .4s;
+}
+.cardHead-preview_loading::after {
+    content: attr(data-loading);
+    position: absolute;
+    left: 75%;
+    top: 57%;
+    transform: translate(-50%,-50%);
+    width: fit-content;
+    height: 1%;
+    color: #00000000;
+    font-size: 18px;
+    animation: preview_loading 2s cubic-bezier(0.15, 0, 0.85, 1) infinite;
+    z-index: 1;
+    background-color: var(--color-twitch-purple);
+}
+.cardHead-preview_loading.cardHead-preview_loading_fail::before {
+    content: attr(data-loading);
+    text-align: center;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    width: fit-content;
+}
+.cardHead-preview_loading.cardHead-preview_loading_fail:hover::before {
+    background-color: #ff000030; /*Seethrough red color*/
+}
+.cardHead-preview_loading.cardHead-preview_loading_fail::after {
+    background-color: red !important;
+    box-shadow: 0px 1px 4px 1px red;
+    animation: none;
+    width: fit-content;
+    padding: 0px 5px;
+    left: 50%;
+}
+
+@keyframes preview_loading {
+    0% {
+        left: 75%;
+        width: 1%;
+    }
+    25% {
+        left: 50%;
+        width: 20%;
+    }
+    50% {
+        left: 25%;
+        width: 1%;
+    }
+    75% {
+        left: 50%;
+        width: 20%;
+    }
+    100% {
+        left: 75%;
+        width: 1%;
+    }
+}
+
 .cardHead-overlay {
 	pointer-events: none;
-    width: var(--card-width);
+    width: 100%;
     height: 100%;
     position: relative;
 }
+/* Stats display */
+.cardHead-overlay .stream-stats {
+    color: var(--SC-stream-stats-color);
+    opacity: 0;
+    pointer-events: all;
+    user-select: text;
+    position: absolute;
+    height: 18px;
+    margin: 8px 10px;
+    background-color: var(--SC-head-overlay-background);
+    padding: 1px 5px;
+    border-radius: var(--card-radious);
+    transition: all .3s;
+}
+.streamCard:hover .stream-stats {
+    opacity: 1;
+}
+.streamCard .follow-age {
+    font-weight: bolder;
+}
+.streamCard .views {
+    float: right;
+    padding-left: 3px;
+}
+.streamCard .views-svg-container {
+    display: inline-block;
+    float: left;
+    width: 15px;
+    height: 15px;
+    overflow: hidden;
+}
+
 .cardHead-overlay_bottomEffect {
-    width: var(--card-width);
+    width: 100%;
     height: 25%;
     left: 0;
     bottom: 0;
     position: absolute;
     background-image: linear-gradient(#00000000, #000000e0);
 }
+/* Uptime display*/
 .cardHead-overlay_uptime {
-	color: #eee;
+	color: var(--SC-stream-stats-color);
 	pointer-events: all;
 	user-select: text;
     position: absolute;
+    height: 18px;
     right: 0;
     margin: 8px 10px;
-    background-color: #00000080;
+    background-color: var(--SC-head-overlay-background);
     padding: 1px 5px;
     border-radius: var(--card-radious);
 }
+.cardHead-overlay_uptime .uptime {
+    float: left;
+    padding-left: 3px;
+}
+/* Viewers display */
 .cardHead-overlay_viewers {
-	color: #eee;
+	color: var(--SC-stream-stats-color);
 	pointer-events: all;
 	user-select: text;
     position: absolute;
     left: 0;
     bottom: 0;
     padding: 8px;
+}
+/* Edits to views svg in viewers container*/
+.cardHead-overlay_viewers .views-svg-container {
+    margin-right: 3px;
+}
+.cardHead-overlay_viewers .views-svg-container svg {
+    fill: #d22f2f !important;
 }
 
 
@@ -123,18 +414,17 @@ body {
 
 /* Start of cardBody */
 .cardBody {
-    height: 80px;
-    margin-top: 3px;
+    height: 35.7%;
     position: relative;
-	padding: 2px;
+	padding: 3px;
 }
 .cardBody-top {
-	height: 63%;
+	height: 50%;
 }
 .cardBody-left {
     float: left;
-    width: 50px;
-    height: 100%;
+    width: 15.924%
+    display: inline-block;
 }
 .cardBody-left_logoImage {
     width: 50px;
@@ -144,47 +434,229 @@ body {
 }
 .cardBody-right {
     float: left;
-    height: 50px;
-    width: 260px;
+    height: 100%;
+    width: 82%;
+    margin-left: 1.86%;
 	user-select: text;
 }
 .cardBody-right_text {
-	width: 250px;
+	width: 100%;
     float: left;
-    margin-left: 10px;
 }
 .cardBody-rt {
-    width: 255px;
     font-size: 13px;
     font-weight: 1000;
-	color: #ccc;
+	color: var(--SC-body-gray-bold);
 }
-.cardBody-rt, .cardBody-rd {
+.cardBody-rt::after {
+    display: inline-block;
+    position: absolute;
+    content: attr(data-title);
+    float: left;
+    width: fit-content;
+    max-width: 82%;
+    left: 56px;
+    padding: 0px 4px;
+    z-index: 100;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .2s;
+}
+.cardBody-rt:hover::after {
+    opacity: 1;
+    background-color: var(--SC-body-hover-highlight);
+    color: var(--color-twitch-purple) !important;
+}
+.cardBody-rt, .cardBody-rd, .cardBody-rn {
+    width: fit-content;
+    max-width: 100%;
 	white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .cardBody-rn {
-    color: #9f9da8;
+    color: var(--SC-body-gray-color);
 }
 .cardBody-rd {
-    color: #9f9da8;
+    color: var(--SC-body-gray-color);
 }
 .cardBody-link, .cardBody-link:focus {
-	color: #b4b4b4;
+	color: var(--SC-link-gray-color);
 	text-decoration: none;
 	transition: color .2s;
 }
 .cardBody-link:hover, .cardBody-link:focus {
 	text-decoration: none;
-	color: #9d63f3 !important;
+	color: var(--color-twitch-purple) !important;
 }
 
 
 .cardBody-bottom {
 	position: relative;
-	height: 37%;
+	height: 50%;
+    margin-top: 1%;
+    padding: 0px 5px 0px 5px;
 }
-.cardBody-button-removetest {
-	margin: 5px;
+.stream-stats button {
+    float: left;
+}
+.stream-stats .notifications {
+    display: inline-block;
+    position: absolute;
+    right: 3px;
+    top: 0px;
+    float: right;
+    padding: 1px 3px;
+    margin: 2px 1px;
+    background-color: var(--SC-body-notifications-red);
+    border-radius: 3px;
+    color: white;
+}
+.stream-stats .notifications::after {
+    content: attr(data-title);
+    position: absolute;
+    opacity: 0;
+    background-color: inherit;
+    padding: 0px 5px;
+    border-radius: 3px;
+    top: 125%;
+    right: -5%;
+    width: max-content !important;
+    pointer-events: none;
+    z-index: 100;
+    transition: opacity .3s;
+    transition-delay: 0s;
+}
+.stream-stats .notifications::before {
+    content: '';
+    position: absolute;
+    opacity: 0;
+    width: 10px;
+    top: 110%;
+    right: 10%;
+    transform: rotateZ(45deg);
+    height: 10px;
+    background-color: inherit;
+    z-index: 50;
+    pointer-events: none;
+    transition: opacity .3s;
+    transition-delay: 0s;
+}
+.stream-stats .notifications:hover::before {
+    opacity: 1;
+    transition-delay: .6s;
+}
+.stream-stats .notifications:hover::after {
+    opacity: 1;
+    transition-delay: .6s;
+}
+
+.stream-stats .notifications.active {
+    background-color: var(--SC-body-notifications-green);
+}
+.cardBody-bottom .follow-age {
+    color: var(--SC-body-gray-color);
+}
+.cardBody-button {
+	margin: 0px 5px;
+}
+
+
+
+body[logged_in="true"] .streamCards-container[loading="false"] .no-content-container:only-child .no-content-text {
+    opacity: 1 !important;
+}
+body[logged_in="true"] .streamCards-container[loading="false"] .no-content-container:only-child .search-content-none {
+    opacity: 0 !important;   
+}
+.streamCards-container[loading="true"] .no-content-container:only-child .twitch-loading-icon {
+    opacity: 1 !important;
+}
+.no-content-container {
+    position: absolute;
+    width: 100%;
+    left: 50%;
+    transform: translate(-50%,180px);
+}
+.no-content-text, .search-content-none {
+    opacity: 0;
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 30%;
+    color: var(--no-content-gray);
+    font-size: 18px;
+    font-style: italic;
+    transform: translatex(-50%);
+}
+
+.twitch-loading-icon {
+    opacity: 0;
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translatex(-50%);
+    width: 55px;
+    height: 70px;
+    overflow: hidden;
+    font-size: 12px;
+    font-style: normal;
+    color: White;
+}
+.twitch-loading-icon:after {
+    content: 'Loading...';
+    position: absolute;
+    float: left;
+    top: 80%;
+    left: 50%;
+    color: var(--loading-text-color);
+    transform: translatex(-50%);
+    animation: loading-content 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+.twitch-loading-icon svg {
+    fill: var(--twitch-loading-icon-fill);
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translatex(-50%);
+    animation: twitch-loading 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+@keyframes twitch-loading {
+    0% {
+        transform: translate(-50%,0px);
+    }
+    25% {
+        transform: translate(-50%,-20px);
+    }
+    40% {
+        transform: translate(-50%,10px);
+    }
+    50% {
+        transform: translate(-50%,-10px);
+    }
+    60% {
+        transform: translate(-50%,5px);
+    }
+    70% {
+        transform: translate(-50%,0px);
+    }
+}
+@keyframes loading-content {
+    25% {
+        content: 'Loading';
+    }
+    45% {
+        content: 'Loading.';
+    }
+    65% {
+        content: 'Loading..';
+    }
+    85% {
+        content: 'Loading...';
+    }
 }

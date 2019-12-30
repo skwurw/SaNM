@@ -13,29 +13,31 @@ function getQueryVariable(variable,method) {
     return false;
 }
 
-$(document).ready(() => {
-	var client_id = getQueryVariable('client_id','hash');
-	var token = getQueryVariable('access_token','hash');
-	var error = getQueryVariable('error','search')
 
-	if (client_id || token) {
-		if (token) {
-			//Post message to window with token
-			$('.token').html(`Access token: ${token}`);
-			$('.location').html(window.location.href);
-			var message = {
-				token:token,
-				success:true
-			};
-			window.opener.postMessage(message,window.location.origin);
-		}
-	} else {
-		$('body').html('Unauthorized');
-		$('body').append(`<div>${window.location.href}</div>`);
+
+// $(document).ready(() => {
+var client_id = getQueryVariable('client_id','hash');
+var token = getQueryVariable('access_token','hash');
+var error = getQueryVariable('error','search')
+
+if (client_id || token) {
+	if (token) {
+		//Post message to window with token
+		// $('.token').html(`Access token: ${token}`);
+		// $('.location').html(window.location.href);
 		var message = {
-			error:error,
-			success:false
+			token:token,
+			success:true
 		};
 		window.opener.postMessage(message,window.location.origin);
 	}
-});
+} else {
+	// $('body').html('Unauthorized');
+	// $('body').append(`<div>${window.location.href}</div>`);
+	var message = {
+		error:error,
+		success:false
+	};
+	window.opener.postMessage(message,window.location.origin);
+}
+// });
