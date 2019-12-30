@@ -32,10 +32,15 @@ var Stream = function(data,app) {
 		},
 		data:app.followedInfo[app.user._id].data[data.channel._id]
 	};
+	var data_object = {user:this.info.name,_id:this.info.id,type:this.info.type,game:this.info.game};
+	data_object = JSON.stringify(data_object);
 
-	this.element = $(`<div class="streamCard" data-user="${this.info.name}" data-id="${this.info.id}" data-stream_type="${this.info.type}"></div>`).append(template);
-	this.element.attr('data-viewers',this.info.viewers);
+	// this.element = $(`<div class="streamCard" data-user="${this.info.name}" data-id="${this.info.id}" data-stream_type="${this.info.type}" data="${JSON.stringify(data_object)}"></div>`).append(template);
+	// this.element.attr('data-viewers',this.info.viewers);
+	// 'data-user':this.info.name,'data-id':this.info.id,'data-stream_type':this.info.type,
 
+	this.element =  $(`<div class="streamCard"></div>`).append(template);
+	this.element.attr({'data-viewers':this.info.viewers,'data-stream_type':this.info.type,'data':data_object})
 
 	var stats = $(this.element).find('.stream-stats');
 	if (this.info.data) {
@@ -61,6 +66,10 @@ var Stream = function(data,app) {
 		.find('.cardBody-button.button-highlight')
 		.click((el) => {$(this.element).toggleClass('highlight')})
 		.contextmenu((el) => {
+			if ($('.streamCards-container').attr('search-mode') != 'user') {
+				// If search mode is not set to user then ignore
+				return;
+			}
 			var searchAlert = $('.search-streamCards'), name = this.info.name;
 			if (searchAlert.val().toLowerCase() != name.toLowerCase()) {$(this.element).addClass('highlight');}
 			var _val = searchAlert.val()!=name?name:'';
@@ -208,7 +217,7 @@ Stream.prototype.remove = function(app) {
 	$(this.element).remove();
 	delete app.streams._constructs[name];
 
-	var find = app.streams.streams.findIndex(x => {return x.channel.display_name == name});
+	var find = app.streams.streams.findIndex(x => x.channel.display_name == name);
 	if (find>=0) {
 		app.streams.streams.splice(find,1);
 	}

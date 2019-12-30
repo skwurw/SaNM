@@ -24,11 +24,14 @@
 			<div class='login-user-contents'>
 				<div class='login-user-contents_name'>test</div>
 				<label>
-					<input class="search-streamCards" type="text"name="search" placeholder="Search Cards" tabindex="100">
+					<input class="search-streamCards" type="text"name="search" placeholder="Search Cards by user" tabindex="100">
+					<div class='search-mode'>Search mode: <b>user</b></div>
 				</label>
 			</div>
 		</div>
-		<div id="space"></div>
+		<!-- <div class="nav">
+			
+		</div> -->
 		<div class="main">
 			<div class='streamCard' data-user="" type='streamcard-template'>
 				<div class='cardHead'>
@@ -113,7 +116,7 @@
 				</div>
 			</div>
 
-			<div class="streamCards-container" loading="false">
+			<div class="streamCards-container" loading="false" search-mode="user">
 				<div class="no-content-container">
 					<div class="no-content-text">There are no streams you follow that are live at this time.</div>
 					<div class="twitch-loading-icon">
@@ -122,8 +125,8 @@
 					<div class="search-content-none"></div>
 				</div>
 			</div>
+			<footer style="display: none;"></footer>
 		</div>
-		<footer style="display: none;"></footer>
 
 		<script src="resources/jquery-3.2.1.min.js"></script>
 		<script src="resources/bootbox.min.js"></script>

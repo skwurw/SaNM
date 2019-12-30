@@ -1,5 +1,5 @@
 "use strict";
-var app,popup;
+let app,popup;
 
 function dateDiff(start, end) {
     var years = 0, months = 0, days = 0;
@@ -48,7 +48,7 @@ window.addEventListener('message',(event) => {
 	}
 
 	// If passed, get token, close popup, and set the token for login.
-	var token = event.data.token;
+	const token = event.data.token;
 	popup.close();
 	app.setToken(token);
 });
@@ -98,7 +98,7 @@ $(document).ready(() => {
 		
 		if (details.user) {
 			var name = details.user.display_name;
-			$('.login-user-contents div').html(`Logged in as: ${name}`);
+			$('.login-user-contents .login-user-contents_name').html(`Logged in as: ${name}`);
 
 			// If init is set then show success login alert (trigged by setUser)
 			if (init) {
@@ -127,13 +127,42 @@ $(document).ready(() => {
 
 
 	// Searching funciton
-	var _found, searchTimeout;
-	var querySearch = function(search) {
+	var _found, searchTimeout, searchType = 'user';
+	var allowTypes = ['user','game'];
+	var querySearch = function( {_search = ''} ) {
+		// If the search starts with a = then we treat it as changing the search mode
+		if (_search.substr(0,1) == '=' && _search != '=') {
+			// We are changing what we are searching for.
+			if (allowTypes.indexOf(_search.substr(1,))>-1) {
+				searchType = _search.substr(1,).toLowerCase();
+
+				// Change text under earch input to show what mode we are in and aswell set the mode in the container for stream cards
+				// Also set our input to nothing since we successfuly changed modes
+				$('.login-user-contents .search-mode').html(`Search mode: <b>${searchType}</b>`);
+				$('.streamCards-container').attr({'search-mode':searchType});
+				$('.search-streamCards').val('').attr({'placeholder':`Search Cards by ${searchType}`});
+			} else {
+				// If what was sepcified not in allowed list then just treat as a normal search.
+				$('.search-streamCards').val(_search.substr(1,)).change();
+			}
+
+			return; // Return to stop the actual filter from running
+		} if (_search == '=') {
+			// If its just = then don't do anything.
+			return; // Return to stop the actual filter from running
+		}
+
+		// If there is no = at the start then do a normal filter for current search mode
 		$('.streamCard').filter((i) => {
-			var cards = $($('.streamCard')[i]), name = cards.attr('data-user');
-			var found = name.toLowerCase().indexOf(search.toLowerCase()) > -1;
+			var card = $($('.streamCard')[i]), name;
+			try {
+				name = JSON.parse(card.attr('data'))[searchType];
+			} catch (e) {
+				name = '';
+			}
+			var found = name.toLowerCase().indexOf(_search.toLowerCase()) > -1;
 			_found = found?true:_found;
-			$(cards).toggle(found)
+			$(card).toggle(found)
 		});
 
 		var searchAlert = $('.search-content-none');
@@ -151,9 +180,9 @@ $(document).ready(() => {
 		_found = false;
 
 		if (search != '') {
-			searchTimeout = setTimeout(querySearch.bind(null,search),300);
+			searchTimeout = setTimeout(() => querySearch( {_search:search} ),300);
 		} else {
-			querySearch(search);
+			querySearch( {_search:search} );
 		}
 	}
 
@@ -166,5 +195,17 @@ $(document).ready(() => {
 		$('.streamCards-container').width(width*370);
 	}
 	updateWidth();
-	$(window).on('resize',updateWidth);
+
+
+	var updateNav = function() {
+		if (document.documentElement.scrollTop>30) {
+			$('.nav').addClass('collaps')
+		} else {
+			$('.nav').removeClass('collaps');
+		}
+	}
+
+	// 
+	$('.search-mode').attr('title','Determs what you are searching for.\nEither by user name or the game they are playing.\nChange modes by typing in: =user or: =game.');
+	$(window).on('resize',updateWidth).on('scroll',updateNav);
 });

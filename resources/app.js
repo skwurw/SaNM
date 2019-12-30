@@ -263,7 +263,7 @@ App.prototype.checkLogin = function(init) {
 App.prototype.alertChanges = function(_app,_removed,_added,forced) {
 	if ((_removed.length==0 && _added.length==0) && !forced) {
 		// If there are no changes to added/removed then don't do anything
-		console.log('Skipping cause no changes.',_added,_removed);
+		// console.log('Skipping cause no changes.',_added,_removed);
 		return;
 	}
 	var removedStreamNames = '', addedStreamNames = '';
@@ -293,7 +293,7 @@ App.prototype.alertChanges = function(_app,_removed,_added,forced) {
     	for (var [index,item] of _app.streams.alert.removed.entries()) {
     		var len = _app.streams.alert.removed.length;
     		var lastIndex = (index+1)!=len;
-    		removedStreamNames += (!lastIndex&&len!=1?'and ':'')+item.channel.display_name+(lastIndex&&len!=1?', ':'');
+    		removedStreamNames += (!lastIndex&&len!=1?'and ':'')+`${item.channel.display_name} [${item.broadcast_platform}]`+(lastIndex&&len!=1?', ':'');
     		
     		var item = _app.streams._constructs[item.channel.display_name];
     		if (item) {
@@ -307,7 +307,7 @@ App.prototype.alertChanges = function(_app,_removed,_added,forced) {
     		if (item.broadcast_platform=='live') { // Make sure if we are alerting for new streams that are live
     			var len = _app.streams.alert.added.length;
 	    		var lastIndex = (index+1)!=len;
-	    		addedStreamNames += (!lastIndex&&len!=1?'and ':'')+item.channel.display_name+(lastIndex&&len!=1?', ':'');
+	    		addedStreamNames += (!lastIndex&&len!=1?'and ':'')+`${item.channel.display_name} [${item.broadcast_platform}]`+(lastIndex&&len!=1?', ':'');
 	    	} else {
 	    		// If stream isn't live, then remove it from _added
 	    		_app.streams.alert.added.splice(index-1,1);
@@ -327,10 +327,14 @@ App.prototype.alertChanges = function(_app,_removed,_added,forced) {
 			title:'Changes to streams',
 			message:message,
 			backdrop:true,
+			closeButton:false,
 			className:'streams-change-alert',
 			buttons:{
 				confirm:{
-					label:'Close',
+					label:'Clear',
+				},
+				cancel:{
+					label:'Hide'
 				}
 			},
 			callback:(e) => {
@@ -380,14 +384,18 @@ App.prototype.updateStreams = function(forced) {
 
 		var compare = function(otherArray) {
 		    // otherArray is provided from caller
-		    return function(current) {
-		        // Current is given by the caller filter function
-		        return otherArray.filter(function(other) {
-		            // Other is given by filter funciton applyed to otherArray
-		            // Compare other to current names
-		            return other.channel.display_name == current.channel.display_name;
-		        }).length == 0; // Idk why this is here but stackoverflow says to add it here
-		    }
+		    // return function(current) {
+		    //     // Current is given by the caller filter function
+		    //     return otherArray.filter(function(other) {
+		    //         // Other is given by filter funciton applyed to otherArray
+		    //         // Compare other to current names
+		    //         return other.channel.display_name == current.channel.display_name;
+		    //     }).length == 0; // Idk why this is here but stackoverflow says to add it here
+		    // }
+		    
+		    //Learned more about arrow syntax and wanted to condense the filter to one line
+		    //Also learned the why .length == 0 is needed, because the filter works with a boolean and not an index
+		    return current => otherArray.filter(other => other.channel.display_name == current.channel.display_name).length == 0;
 		}
 		var sortStreams = function() {
 			var $parent = $('.streamCards-container');
