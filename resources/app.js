@@ -1,8 +1,8 @@
 "use strict";
 
 var App = function(version) {
-	this.version = '1.1.1';
-	this.askScopes = ['user_read','user_follows_edit'];
+	this.version = '1.1.2';
+	this.askScopes = ['user_read'];
 	this.settings = {
 		liveStats:{
 			description:'Track the time at which streams are started and ended. Only works when you view the site',
