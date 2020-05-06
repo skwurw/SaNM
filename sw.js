@@ -1,6 +1,6 @@
 var CACHE_NAME = 'SANM-CACHE';
 var urlsToCache = [
-	'/',
+	'/SaNM',
 ];
 
 self.addEventListener('install', (event) => {
