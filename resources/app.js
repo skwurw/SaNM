@@ -1,7 +1,7 @@
 "use strict";
 
 var App = function(version) {
-	this.version = '1.1.2';
+	this.version = '1.1.3';
 	this.askScopes = ['user_read'];
 	this.settings = {
 		liveStats:{
