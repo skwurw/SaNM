@@ -270,7 +270,7 @@ App.prototype.alertChanges = function(_app,_removed,_added,forced) {
 
 	if (_removed.length) {
     	for (item of _removed) {
-    		var find = _app.streams.alert.removed.findIndex(e => {return e.channel.display_name == item.channel.display_name});
+    		var find = _app.streams.alert.removed.findIndex(e => {return e.channel.name == item.channel.name});
     		if (find==-1) {
 	    		_app.streams.alert.removed.push(item);
 	    	} else {
@@ -280,7 +280,7 @@ App.prototype.alertChanges = function(_app,_removed,_added,forced) {
     }
     if (_added.length) {
     	for (item of _added) {
-    		var find = _app.streams.alert.added.findIndex(e => {return e.channel.display_name == item.channel.display_name});
+    		var find = _app.streams.alert.added.findIndex(e => {return e.channel.name == item.channel.name});
     		if (find==-1) {
 	    		_app.streams.alert.added.push(item);
 	    	} else {
@@ -293,9 +293,10 @@ App.prototype.alertChanges = function(_app,_removed,_added,forced) {
     	for (var [index,item] of _app.streams.alert.removed.entries()) {
     		var len = _app.streams.alert.removed.length;
     		var lastIndex = (index+1)!=len;
-    		removedStreamNames += (!lastIndex&&len!=1?'and ':'')+`${item.channel.display_name} [${item.broadcast_platform}]`+(lastIndex&&len!=1?', ':'');
+    		removedStreamNames += (!lastIndex&&len!=1?'and ':'')+`<span style='color:red;'>${item.channel.display_name}</span> [${item.broadcast_platform}]`+(lastIndex&&len!=1?', ':'');
     		
-    		var item = _app.streams._constructs[item.channel.display_name];
+    		// Get stream constructor and remove it
+    		var item = _app.streams._constructs[item.channel.name];
     		if (item) {
 	    		item.remove(_app);
 	    	}
@@ -307,7 +308,7 @@ App.prototype.alertChanges = function(_app,_removed,_added,forced) {
     		if (item.broadcast_platform=='live') { // Make sure if we are alerting for new streams that are live
     			var len = _app.streams.alert.added.length;
 	    		var lastIndex = (index+1)!=len;
-	    		addedStreamNames += (!lastIndex&&len!=1?'and ':'')+`${item.channel.display_name} [${item.broadcast_platform}]`+(lastIndex&&len!=1?', ':'');
+	    		addedStreamNames += (!lastIndex&&len!=1?'and ':'')+`<span style='color:green'>${item.channel.display_name}</span> [${item.broadcast_platform}]`+(lastIndex&&len!=1?', ':'');
 	    	} else {
 	    		// If stream isn't live, then remove it from _added
 	    		_app.streams.alert.added.splice(index-1,1);
@@ -414,7 +415,9 @@ App.prototype.updateStreams = function(forced) {
 		    this.streams._constructs = this.streams._constructs || {};
 
 		    for (var [index,_stream] of data.streams.entries()) {
-		    	var name = _stream.channel.display_name;
+		    	// var name = (_stream.channel.broadcaster_language=='en'?_stream.channel.display_name:_stream.channel.name);
+		    	var name = _stream.channel.name;
+		    	
 		    	if (_stream.broadcast_platform == 'live') {
 			    	if (!this.streams._constructs[name]) {
 			    		var _s = new Stream(_stream,this);
@@ -440,8 +443,8 @@ App.prototype.updateStreams = function(forced) {
 			    	// Find any reruns and remove them from added
 			    	var _find = added.findIndex((x) => {return x.broadcast_platform == 'rerun'});
 			    	if (_find>-1) {added.splice(_find,1);}
-			    	if (this.streams._constructs[_stream.channel.display_name]) {
-			    		this.streams._constructs[_stream.channel.display_name].remove(this)
+			    	if (this.streams._constructs[_stream.channel.name]) {
+			    		this.streams._constructs[_stream.channel.name].remove(this)
 			    		removed.push(_stream);
 			    	}
 			    	var _g='color:lime;',_y='color:yellow',_w='color:default;';
@@ -522,13 +525,16 @@ App.prototype.updateFollowedInfo = function(forced) {
 
 						var _follow = dateDiff(new Date(created_at),new Date());
 						var years = _follow.years || 0, months = _follow.months || 0, weeks = _follow.weeks || 0, days = _follow.days || 0;
-						var followed_short = (years>0?years+(years<=1?" year":" years"):(months>0?months+(months==0?" month":" months"):(days>0?days+(days==0?" day":" days"):"Not long")));
-						var followed_full = (years>0?years+" years":"")+(years>0?", ":" ")+(months>0?months+" months":"")+(months>0?", ":" ")+(days>0?days+" days":"");
+						var followed_short = (years>0?years+(years!=1?" years":" year"):(months>0?months+(months!=1?" months":" month"):(days>0?days+(days!=1?" days":" day"):"Less than a day")));
+						var followed_full = [(years>0?years+(years!=1?' years':' year'):''),(months>0?months+(months!=1?' months':' month'):''),(days>0?days+(days!=1?' days':' day'):'')].filter((a)=>{return a!=''}).join(', ');
 
 						that.followedInfo[that.user._id].data[_id] = {
 							followed_at:created_at,
 							followed_length:_follow,
-							followed_tooltip:{full:followed_full,short:followed_short},
+							followed_tooltip:{
+								full:(followed_full==''?'Less than a day':followed_full),
+								short:followed_short
+							},
 							notifications:notifications,
 							name:name,
 							banner:banner

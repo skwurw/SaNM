@@ -1,6 +1,18 @@
 {
   "short_name": "SaNM",
   "name": "Stream and Notifications Manager",
+  "icons":[
+		{
+			"src":"/resources/192.png",
+			"type":"image/png",
+			"sizes":"192x192"
+			},
+		{
+			"src":"/resources/512.png",
+			"type":"image/png",
+			"sizes":"512x512"
+		}
+	],
   "start_url": "/",
   "background_color": "#222",
   "display": "standalone",

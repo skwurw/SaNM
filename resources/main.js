@@ -53,6 +53,27 @@ window.addEventListener('message',(event) => {
 	app.setToken(token);
 });
 
+if ('serviceWorker' in navigator) {
+	window.addEventListener('load', (e) => {
+		navigator.serviceWorker.register('/sw.js').then((registration) => {
+			console.log('ServiceWorker registration successful with scope: ', registration.scope);
+		});
+	}, (err) => {
+		console.log('ServiceWorker registration failed: ', err);
+	});
+}
+
+
+window.addEventListener("beforeinstallprompt", function(e) { 
+	// log the platforms provided as options in an install prompt 
+	console.log(e.platforms); // e.g., ["web", "android", "windows"] 
+	e.userChoice.then(function(choiceResult) { 
+		console.log(choiceResult.outcome); // either "accepted" or "dismissed"
+	}, (err) => {
+		console.log('There was an error: ', err);
+	}); 
+});
+
 $(document).ready(() => {
 	app = new App();
 
@@ -162,7 +183,14 @@ $(document).ready(() => {
 			}
 			var found = name.toLowerCase().indexOf(_search.toLowerCase()) > -1;
 			_found = found?true:_found;
-			$(card).toggle(found)
+
+			// Switched to manule css change, jquery toggle recalculating CSS every call
+			if (found) {
+            	$(card).css({display:'inline-block'});
+            } else {
+            	$(card).css({display:'none'});
+            }
+			// $(card).toggle(found)
 		});
 
 		var searchAlert = $('.search-content-none');

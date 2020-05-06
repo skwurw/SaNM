@@ -12,7 +12,8 @@ var template = $('[type="streamcard-template"]').html();
 var Stream = function(data,app) {
 	//Define info for stream constructor function.
 	this.info = {
-		name:data.channel.display_name,
+		display_name:data.channel.display_name,
+		name:data.channel.name,
 		id:data.channel._id,
 		logo:data.channel.logo,
 		game:data.game,
@@ -35,16 +36,12 @@ var Stream = function(data,app) {
 	var data_object = {user:this.info.name,_id:this.info.id,type:this.info.type,game:this.info.game};
 	data_object = JSON.stringify(data_object);
 
-	// this.element = $(`<div class="streamCard" data-user="${this.info.name}" data-id="${this.info.id}" data-stream_type="${this.info.type}" data="${JSON.stringify(data_object)}"></div>`).append(template);
-	// this.element.attr('data-viewers',this.info.viewers);
-	// 'data-user':this.info.name,'data-id':this.info.id,'data-stream_type':this.info.type,
-
 	this.element =  $(`<div class="streamCard"></div>`).append(template);
 	this.element.attr({'data-viewers':this.info.viewers,'data-stream_type':this.info.type,'data':data_object})
 
 	var stats = $(this.element).find('.stream-stats');
 	if (this.info.data) {
-		var notifications_title = `You have Notifications ${this.info.data.notifications?"Enabled":"Disabled"} for ${this.info.name}`;
+		var notifications_title = `You have Notifications ${this.info.data.notifications?"Enabled":"Disabled"} for ${this.info.display_name}`;
 		stats.find('.notifications')
 			.addClass((this.info.data.notifications?'active':''))
 			.attr('data-title',notifications_title);
@@ -53,7 +50,7 @@ var Stream = function(data,app) {
 			.attr('title','Followed on '+new Date(this.info.data.followed_at)
 			.toLocaleString());
 	} else {
-		$(this.element).find('.follow-age').css('visibility','hidden');
+		$(this.element).find('.follow-age').html('No data for following age');
 		$(this.element).find('.notifications').css('visibility','hidden');
 	}
 	stats.find('.followers span').html(convert(this.info.channel.followers));
@@ -79,7 +76,6 @@ var Stream = function(data,app) {
 	var logo = this.info.logo;
 	$(this.element).find('.cardBody-left_logoImage').attr('src',logo);
 
-
 	// Way to track image loading
 	this.stream_preview_load = new Date().getTime();
 	this.preview_loadtime = 8; // How long before we cancel loading the preview
@@ -93,8 +89,6 @@ var Stream = function(data,app) {
 			.toggleClass()
 			.find('.cardHead-stream_preview')
 			.show();
-
-		// console.log(`Preview for ${this.info.name} loaded after ${loadTime}s`);
 	}).on('error',() => {
 		if (this.preview_timeout != 0) {
 			clearTimeout(this.preview_timeout);
@@ -146,11 +140,12 @@ Stream.prototype.update = function(type,data,app) {
 		var preview = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.info.name.toLowerCase()}-${imgWidth}x${imgHeight}.jpg?p=${perfTime}`;
 
 		var game = this.info.game;
-		var channel = this.info.name;
+		var displayName = this.info.display_name;
+		var name = this.info.name;
 		var startTime = new Date(this.info.video.started_at).toLocaleTimeString();
-		var gameLink = `<a href="https://www.twitch.tv/directory/game/${game}" target="_blank" rel="noopener" class="cardBody-link" tabindex="-1">${game}</a>`;
-		var streamLink = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link" tabindex="-1">${channel}</a>`;
-		var streamTitle = `<a href="https://www.twitch.tv/${channel}" target="_blank" rel="noopener" class="cardBody-link" tabindex="-1"></a>`;
+		var gameLink = `<a href="https://www.twitch.tv/directory/game/${game.toLowerCase()}" target="_blank" rel="noopener" class="cardBody-link" tabindex="-1">${game}</a>`;
+		var streamLink = `<a href="https://www.twitch.tv/${name.toLowerCase()}" target="_blank" rel="noopener" class="cardBody-link" tabindex="-1">${displayName}</a>`;
+		var streamTitle = `<a href="https://www.twitch.tv/${name.toLowerCase()}" target="_blank" rel="noopener" class="cardBody-link" tabindex="-1"></a>`;
 		
 		// Metadata
 		$(this.element).data('viewers',this.info.viewers)
@@ -179,15 +174,15 @@ Stream.prototype.update = function(type,data,app) {
 			.addClass('cardHead-preview_loading')
 			.attr('data-loading','Loading preview...')
 			.removeClass('cardHead-preview_loading_fail')
-			.attr('href',`https://www.twitch.tv/${channel}`);
+			.attr('href',`https://www.twitch.tv/${name.toLowerCase()}`);
 
 		// Card Head
 		$(this.element).find('.cardHead-overlay_uptime').attr('title',`Started at:\n${startTime}`);
 		$(this.element).find('.cardHead-overlay_viewers span').html(this.info.viewers.toLocaleString());
-		// }
 	} else if (type == 'data') {
 		this.info = {
-			name:data.channel.display_name,
+			display_name:data.channel.display_name,
+			name:data.channel.name,
 			id:data.channel._id,
 			logo:data.channel.logo,
 			game:data.game,
@@ -217,7 +212,7 @@ Stream.prototype.remove = function(app) {
 	$(this.element).remove();
 	delete app.streams._constructs[name];
 
-	var find = app.streams.streams.findIndex(x => x.channel.display_name == name);
+	var find = app.streams.streams.findIndex(x => x.channel.name == name);
 	if (find>=0) {
 		app.streams.streams.splice(find,1);
 	}
