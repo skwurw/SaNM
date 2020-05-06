@@ -55,7 +55,7 @@ window.addEventListener('message',(event) => {
 
 if ('serviceWorker' in navigator) {
 	window.addEventListener('load', (e) => {
-		navigator.serviceWorker.register('/sw.js').then((registration) => {
+		navigator.serviceWorker.register('sw.js').then((registration) => {
 			console.log('ServiceWorker registration successful with scope: ', registration.scope);
 		});
 	}, (err) => {

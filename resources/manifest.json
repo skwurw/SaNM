@@ -3,12 +3,12 @@
   "name": "Stream and Notifications Manager",
   "icons":[
 		{
-			"src":"/resources/192.png",
+			"src":"resources/192.png",
 			"type":"image/png",
 			"sizes":"192x192"
 			},
 		{
-			"src":"/resources/512.png",
+			"src":"resources/512.png",
 			"type":"image/png",
 			"sizes":"512x512"
 		}
