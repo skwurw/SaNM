@@ -505,7 +505,7 @@ App.prototype.updateFollowedInfo = function(forced) {
 				offset = offset?offset:0;
 
 				var settings = {
-					url:`https://api.twitch.tv/kraken/users/${that.user._id}/follows/channels?limit=100&offset=${offset}&direction=desc`,
+					url:`https://api.twitch.tv/kraken/users/${that.user._id}/follows/channels?limit=100&offset=${offset}&direction=desc&sortby=last_broadcast`,
 					method:'GET',
 					headers:{
 						'Accept':'application/vnd.twitchtv.v5+json',
