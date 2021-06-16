@@ -1,0 +1,11 @@
+.item:hover::after {
+	content: attr(value);
+	background-color: #0000ffa1;
+	position: absolute;
+	left: 0;
+	font-size: 24px;
+    margin-top: 14px;
+	margin-left: 5px;
+	padding: 0px 5px;
+	pointer-events: none;
+}

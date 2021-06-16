@@ -1,12 +1,12 @@
 "use strict";
 
 var App = function(version) {
-	this.version = '1.1.4';
+	this.version = '1.1.5';
 	this.askScopes = ['user_read'];
 	this.settings = {
 		liveStats:{
 			description:'Track the time at which streams are started and ended. Only works when you view the site',
-			value:true // always set true when testing
+			value:false // always set true when testing
 		},
 		darkmode:{
 			description:'Enable the darkmode for the webpage. Default is true',
@@ -281,10 +281,15 @@ App.prototype.alertChanges = function(_app,_removed,_added,forced) {
     if (_added.length) {
     	for (item of _added) {
     		var find = _app.streams.alert.added.findIndex(e => {return e.channel.name == item.channel.name});
+    		var find2 = _app.streams.alert.removed.findIndex(e => {return e.channel.name == item.channel.name});
     		if (find==-1) {
 	    		_app.streams.alert.added.push(item);
 	    	} else {
 	    		console.log(`Ignoring ${item.channel.display_name}`);
+	    	}
+	    	if (find2==1) {
+	    		// Search removed so if a channel was removed but then added back, we don't possibly remove the construct every time the display alert updates
+	    		_app.streams.alert.removed.splice(find2,1);
 	    	}
 	    }
     }
@@ -305,7 +310,7 @@ App.prototype.alertChanges = function(_app,_removed,_added,forced) {
     }
     if (_app.streams.alert.added.length) {
     	for (var [index,item] of _app.streams.alert.added.entries()) {
-    		if (item.broadcast_platform=='live') { // Make sure if we are alerting for new streams that are live
+    		if (/*((item.game == '' && item.viewers >= 1) || (item.game != '' && item.viewers >= 0)) &&*/ item.broadcast_platform == 'live') { // Make sure if we are alerting for new streams that are live
     			var len = _app.streams.alert.added.length;
 	    		var lastIndex = (index+1)!=len;
 	    		addedStreamNames += (!lastIndex&&len!=1?'and ':'')+`<span style='color:green'>${item.channel.display_name}</span> [${item.broadcast_platform}]`+(lastIndex&&len!=1?', ':'');
@@ -348,7 +353,7 @@ App.prototype.alertChanges = function(_app,_removed,_added,forced) {
 		};
 		if (_app.streams.alert.added.length<=1 && _app.streams.alert.removed.length<=1) {bootboxAlert['size'] = 'small'}
 		
-		if (_added.length || _removed.length || forced) {
+		if ((_added.length || _removed.length || forced) && message) {
 			// Only display alert if there are changes or if it was forced
 			$('.streams-change-alert').click(); // Remove current alert to update it
 		    bootbox.confirm(bootboxAlert);
@@ -414,17 +419,21 @@ App.prototype.updateStreams = function(forced) {
 		    var removed = oldStreams.filter(compare(newStreams)); // Get how many objects are removed
 		    this.streams._constructs = this.streams._constructs || {};
 
-		    for (var [index,_stream] of data.streams.entries()) {
-		    	// var name = (_stream.channel.broadcaster_language=='en'?_stream.channel.display_name:_stream.channel.name);
-		    	var name = _stream.channel.name;
-		    	
-		    	if (_stream.broadcast_platform == 'live') {
+		    for (var [index,item] of data.streams.entries()) {
+		    	// var name = (item.channel.broadcaster_language=='en'?item.channel.display_name:item.channel.name);
+		    	var name = item.channel.name;
+		    	/* Allow:
+		    		- (game == '' AND viewers >= 1) OR (game == '*.' AND viewers >= 0)
+				   Disallow:
+		    		- (game == '' AND viewers == 0)
+	    		*/
+		    	if (/*((item.game == '' && item.viewers >= 1) || (item.game != '' && item.viewers >= 0)) &&*/  item.broadcast_platform == 'live') {
 			    	if (!this.streams._constructs[name]) {
-			    		var _s = new Stream(_stream,this);
+			    		var _s = new Stream(item,this);
 			    		this.streams._constructs[name] = _s;
 			    		this.streams._constructs[name].update('uptime',undefined,this).update('display',undefined,this);
 			    	} else {
-			    		this.streams._constructs[name].update('data',_stream,this).update('uptime',undefined,this).update('display',undefined,this);
+			    		this.streams._constructs[name].update('data',item,this).update('uptime',undefined,this).update('display',undefined,this);
 			    	}
 				    
 				    if (this.followedInfo[user] && this.settings.liveStats.value) {
@@ -433,22 +442,32 @@ App.prototype.updateStreams = function(forced) {
 						}
 
 						var streamInfo = {};
-						streamInfo.started_at = _stream.created_at;
+						streamInfo.started_at = item.created_at;
 						streamInfo.finished_at = new Date().toISOString(); // Assume the end time of the stream, will update every time until stream with ID is offline/ended
 						streamInfo.length = Math.floor((new Date(streamInfo.finished_at).getTime()-new Date(streamInfo.started_at).getTime())/1000);
 						this.followedInfo[user].liveStats[name] = this.followedInfo[user].liveStats[name] || {};
-						this.followedInfo[user].liveStats[name][_stream._id] = streamInfo;
+						this.followedInfo[user].liveStats[name][item._id] = streamInfo;
 					}
 			    } else {
 			    	// Find any reruns and remove them from added
-			    	var _find = added.findIndex((x) => {return x.broadcast_platform == 'rerun'});
+			    	console.log('Stream found not to be live:',item);
+			    	var _find = added.findIndex((x) => {
+			    		console.log(x);
+			    		return /*(x.game == '' && x.viewers == 0) ||*/ x.broadcast_platform != 'live'
+			    	}); // x.broadcast_platform == 'rerun'
+			    	// console.log(_find);
 			    	if (_find>-1) {added.splice(_find,1);}
-			    	if (this.streams._constructs[_stream.channel.name]) {
-			    		this.streams._constructs[_stream.channel.name].remove(this)
-			    		removed.push(_stream);
+			    	if (this.streams._constructs[item.channel.name]) {
+			    		this.streams._constructs[item.channel.name].remove(this)
+			    		removed.push(item);
+			    		
+				    	var _g='color:lime;',_y='color:yellow',_w='color:default;';
+				    	/*if (item.game == '' && item.viewers == 0) {
+				    		console.log(`Stream for ${item.channel.name} removed because no game is set and has no viewers. (${item.game} ${item.viewers})`);
+				    	} else {*/
+					    	console.log(`Stream for%c ${item.channel.display_name} %cis not live and is rather a%c ${item.broadcast_platform} %cinstead.`,_g,_w,_y,_w,item);
+				    	// }
 			    	}
-			    	var _g='color:lime;',_y='color:yellow',_w='color:default;';
-			    	console.log(`Stream for%c ${_stream.channel.display_name} %cis not live and is rather a%c ${_stream.broadcast_platform} %cinstead.`,_g,_w,_y,_w,_stream);
 			    }
 		    }
 
@@ -468,8 +487,8 @@ App.prototype.updateStreams = function(forced) {
 		if (!this.intervals.cardsUpdate) {
 	    	this.intervals.cardsUpdate = setInterval(() => {
 	    		for (var name in this.streams._constructs) {
-	    			var _stream = this.streams._constructs[name];
-	    			_stream.update('uptime',undefined,this);
+	    			var item = this.streams._constructs[name];
+	    			item.update('uptime',undefined,this);
 	    		}
 	    	},1000);
 	    }
@@ -517,6 +536,7 @@ App.prototype.updateFollowedInfo = function(forced) {
 				$.ajax(settings).then((data) => {
 					for (var index in data.follows) {
 						var item = data.follows[index];
+						if (!item) {continue}
 						var created_at = item.created_at;
 						var notifications = item.notifications;
 						var _id = item.channel._id;
@@ -610,10 +630,10 @@ App.prototype.error = function(err,_app) {
 		}
 
 		// Clear intervals for all timers set in app.intervals
-		for (var timer in this.intervals) {
-			clearInterval(this.intervals[timer]);
-			this.intervals[timer] = 0;
-		}
+		// for (var timer in this.intervals) {
+		// 	clearInterval(this.intervals[timer]);
+		// 	this.intervals[timer] = 0;
+		// }
 	} else {
 		if (err.status == 0) {
 			var _alert = $('.request-error_0');

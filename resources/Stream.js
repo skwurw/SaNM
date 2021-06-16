@@ -151,8 +151,8 @@ Stream.prototype.update = function(type,data,app) {
 		$(this.element).data('viewers',this.info.viewers)
 			.data('stream_type',this.info.type)
 			.attr('data-viewers',this.info.viewers)
-			.find('.cardHead-overlay_viewers span')
-				.html(this.info.viewers);
+			.find('.cardHead-overlay_viewers #viewers #count')
+				.html(this.info.viewers.toLocaleString());
 
 		// Card body
 		$(this.element).find('.cardBody-rt')
@@ -161,7 +161,7 @@ Stream.prototype.update = function(type,data,app) {
 			.find('a')
 			.text(this.info.status);
 		$(this.element).find('.cardBody-rn').html(streamLink);
-		$(this.element).find('.cardBody-rd').html('Playing '+gameLink);
+		$(this.element).find('.cardBody-rd').html(game ? `Playing ${gameLink}` : '');
 		
 		// Preview timeout
 		clearTimeout(this.preview_timeout);
@@ -178,8 +178,9 @@ Stream.prototype.update = function(type,data,app) {
 
 		// Card Head
 		$(this.element).find('.cardHead-overlay_uptime').attr('title',`Started at:\n${startTime}`);
-		$(this.element).find('.cardHead-overlay_viewers span').html(this.info.viewers.toLocaleString());
 	} else if (type == 'data') {
+		this.updateViewers(data.viewers,this.info.viewers);
+
 		this.info = {
 			display_name:data.channel.display_name,
 			name:data.channel.name,
@@ -200,6 +201,21 @@ Stream.prototype.update = function(type,data,app) {
 	}
 	
 	return this;
+}
+
+Stream.prototype.updateViewers = function(newViewers,oldViewers) {
+	var viewerDiffs = (newViewers-oldViewers);
+
+	$(this.element).find('#floating_text')
+			.html('')
+			.removeClass('overlay_viewers-ani')
+	if (!!viewerDiffs) {
+		// console.log(`Viewer changes for ${this.info.display_name}: ${viewerDiffs} (${oldViewers} -> ${newViewers})`);
+		$(this.element).find('#floating_text')
+			.attr('style',`color: ${viewerDiffs>0 ? '#5ff35d' : '#f35d5d'}`)
+			.html((viewerDiffs>0?'+':'')+viewerDiffs.toLocaleString())
+			.addClass('overlay_viewers-ani');
+	}
 }
 
 Stream.prototype.updateNotifications = function(state) {

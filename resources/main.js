@@ -66,9 +66,9 @@ if ('serviceWorker' in navigator) {
 
 window.addEventListener("beforeinstallprompt", function(e) { 
 	// log the platforms provided as options in an install prompt 
-	console.log(e.platforms); // e.g., ["web", "android", "windows"] 
+	// console.log(e.platforms); // e.g., ["web", "android", "windows"] 
 	e.userChoice.then(function(choiceResult) { 
-		console.log(choiceResult.outcome); // either "accepted" or "dismissed"
+		// console.log(choiceResult.outcome); // either "accepted" or "dismissed"
 	}, (err) => {
 		console.log('There was an error: ', err);
 	}); 
@@ -154,7 +154,7 @@ $(document).ready(() => {
 		// If the search starts with a = then we treat it as changing the search mode
 		if (_search.substr(0,1) == '=' && _search != '=') {
 			// We are changing what we are searching for.
-			if (allowTypes.indexOf(_search.substr(1,))>-1) {
+			if (allowTypes.indexOf(_search.substr(1,).toLowerCase())>-1) {
 				searchType = _search.substr(1,).toLowerCase();
 
 				// Change text under earch input to show what mode we are in and aswell set the mode in the container for stream cards
